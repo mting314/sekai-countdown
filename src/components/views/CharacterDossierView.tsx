@@ -81,28 +81,30 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
 
   return (
     <Stack gap="7">
-      {/* 1. Character Hero Header with Transparent Cutout + Latest Stamp */}
+      {/* 1. Character Hero Header with Full-Bleed Card Art Fade + Latest Stamp */}
       <Box
         style={{
           borderColor: `${character.color}88`,
-          background: `radial-gradient(circle at 80% 35%, ${character.color}3b, transparent 60%)`
+          background: `radial-gradient(circle at 46% 50%, ${character.color}2e, transparent 62%)`
         }}
         position="relative"
         rounded="2xl"
         borderWidth="1px"
-        minH={{ base: '200px', md: '230px' }}
+        minH={{ base: '200px', md: '235px' }}
         p={{ base: '4', md: '6' }}
         bg="bg.subtle"
         overflow="hidden"
       >
         <Box
           position="absolute"
-          right={{ base: '-10px', md: '24px' }}
-          bottom="-8px"
-          opacity={{ base: 0.48, sm: 0.96 }}
+          top="0"
+          right="0"
+          bottom="0"
+          w={{ base: '82%', sm: '66%', md: '58%' }}
+          opacity={{ base: 0.42, sm: 0.96 }}
           pointerEvents="none"
         >
-          <CardCutoutRender card={dossier.heroCard} preferTrained={preferTrained} height={225} />
+          <CardCutoutRender card={dossier.heroCard} preferTrained={preferTrained} />
         </Box>
 
         <Stack position="relative" gap="3.5" maxW={{ base: '100%', sm: '65%' }}>
@@ -443,11 +445,16 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
                         top: '0',
                         right: '0',
                         objectFit: 'cover',
-                        w: '38%',
+                        w: '44%',
                         h: 'full',
-                        opacity: 0.2,
+                        opacity: 0.24,
                         pointerEvents: 'none'
                       })}
+                      style={{
+                        objectPosition: 'center 24%',
+                        maskImage: 'linear-gradient(to right, transparent 0%, black 48%)',
+                        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 48%)'
+                      }}
                     />
                   )}
                   <Flex

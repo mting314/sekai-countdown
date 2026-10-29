@@ -302,27 +302,26 @@ function PodiumCategoryCard({
       bg="bg.subtle"
       overflow="hidden"
     >
-      {/* Top #1 Spotlight with Transparent Cutout */}
+      {/* Top #1 Spotlight with Full-Bleed Card Art Fade */}
       <Box
         style={{
-          background: `radial-gradient(circle at 82% 28%, ${topChar.color}38, transparent 62%)`
+          background: `radial-gradient(circle at 48% 45%, ${topChar.color}30, transparent 65%)`
         }}
         position="relative"
-        minH="185px"
+        minH="188px"
         p="4"
         overflow="hidden"
       >
         <Box
-          display="flex"
           position="absolute"
-          right="-6px"
-          bottom="-6px"
-          justifyContent="flex-end"
-          alignItems="flex-end"
-          w="54%"
+          top="0"
+          right="0"
+          bottom="0"
+          w="66%"
+          opacity={0.92}
           pointerEvents="none"
         >
-          <CardCutoutRender card={cutoutCard} preferTrained={preferTrained} height={175} />
+          <CardCutoutRender card={cutoutCard} preferTrained={preferTrained} />
         </Box>
 
         <Stack position="relative" gap="2" maxW="62%">

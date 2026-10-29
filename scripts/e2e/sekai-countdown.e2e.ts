@@ -312,6 +312,10 @@ async function runDesktop(baseUrl: string, browser: Browser) {
   );
   await page.screenshot({ path: `${OUT}/desktop-07b-character-21-miku.png`, fullPage: false });
 
+  await page.goto(`${baseUrl}/characters/12`, { waitUntil: 'networkidle' });
+  await waitImagesSettled(page);
+  await page.screenshot({ path: `${OUT}/desktop-07c-character-12-toya.png`, fullPage: false });
+
   // 8. Japanese locale + Light mode verification
   await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await page.evaluate(() => {

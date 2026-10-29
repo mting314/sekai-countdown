@@ -12,7 +12,6 @@ import type {
 import {
   attributeIconUrl,
   cardArtUrl,
-  cardCutoutUrl,
   cardThumbUrl,
   characterIconUrl,
   eventLogoUrl,
@@ -268,36 +267,34 @@ export function CardThumbTile({
 }
 
 /**
- * Transparent full-body / bust card cutout from Sekai Viewer (`member_cutout_trm`),
- * gracefully cascading through untrimmed cutout -> card full art -> character icon.
+ * Full-bleed widescreen card illustration (`card_after_training` / `card_normal`)
+ * designed to sit flush against the right edge of a banner/podium card and fade
+ * smoothly into the panel surface on the left.
  */
 export function CardCutoutRender({
   card,
-  preferTrained = true,
-  height = 170
+  preferTrained = true
 }: {
   card?: CompactCard;
   preferTrained?: boolean;
   height?: number;
 }) {
-  const [stage, setStage] = useState<0 | 1 | 2>(0);
+  const [fallbackOtherSide, setFallbackOtherSide] = useState(false);
+  const [broken, setBroken] = useState(false);
 
   useEffect(() => {
-    setStage(0);
+    setFallbackOtherSide(false);
+    setBroken(false);
   }, [card?.id, preferTrained]);
 
-  if (!card) return null;
+  if (!card || broken) return null;
 
-  const candidates = [
-    cardCutoutUrl(card, preferTrained),
-    cardCutoutUrl(card, !preferTrained),
-    cardArtUrl(card, preferTrained)
-  ].filter((u): u is string => Boolean(u));
-
-  const src = candidates[stage];
+  const useTrained = fallbackOtherSide ? !preferTrained : preferTrained;
+  const src = cardArtUrl(card, useTrained);
   if (!src) return null;
 
-  const isFallbackFullArt = src.includes('/character/member/');
+  const fadeMask =
+    'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.12) 14%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.9) 64%, rgba(0,0,0,1) 86%)';
 
   return (
     <img
@@ -306,22 +303,17 @@ export function CardCutoutRender({
       loading="lazy"
       referrerPolicy="no-referrer"
       onError={() => {
-        if (stage < candidates.length - 1) setStage((s) => (s + 1) as 0 | 1 | 2);
+        if (!fallbackOtherSide) setFallbackOtherSide(true);
+        else setBroken(true);
       }}
       style={{
-        height,
-        width: isFallbackFullArt ? '100%' : 'auto',
-        maxWidth: '100%',
-        objectFit: isFallbackFullArt ? 'cover' : 'contain',
-        objectPosition: 'center bottom',
-        borderRadius: isFallbackFullArt ? 12 : undefined,
-        maskImage: isFallbackFullArt
-          ? 'linear-gradient(to left, rgba(0,0,0,0.92) 52%, transparent 100%)'
-          : undefined,
-        WebkitMaskImage: isFallbackFullArt
-          ? 'linear-gradient(to left, rgba(0,0,0,0.92) 52%, transparent 100%)'
-          : undefined,
-        filter: isFallbackFullArt ? 'none' : 'drop-shadow(0 8px 18px rgba(0,0,0,0.35))',
+        width: '100%',
+        height: '100%',
+        display: 'block',
+        objectFit: 'cover',
+        objectPosition: 'center 22%',
+        maskImage: fadeMask,
+        WebkitMaskImage: fadeMask,
         pointerEvents: 'none',
         userSelect: 'none'
       }}
