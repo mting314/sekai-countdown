@@ -17,11 +17,13 @@ export function cardThumbUrl(
 
 export function cardArtUrl(
   card: Pick<CompactCard, 'assetbundleName' | 'rarity'> | undefined,
-  preferTrained = true
+  preferTrained = true,
+  preferLosslessPng = true
 ): string | undefined {
   if (!card?.assetbundleName) return undefined;
   const suffix = preferTrained && canBeTrained(card) ? 'card_after_training' : 'card_normal';
-  return `${SEKAI_ASSET_CDN}/character/member/${card.assetbundleName}/${suffix}.webp`;
+  const ext = preferLosslessPng ? 'png' : 'webp';
+  return `${SEKAI_ASSET_CDN}/character/member/${card.assetbundleName}/${suffix}.${ext}`;
 }
 
 export function cardCutoutUrl(

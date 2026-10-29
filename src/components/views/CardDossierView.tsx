@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BiChevronLeft, BiChevronRight, BiExpandAlt, BiLinkExternal } from 'react-icons/bi';
 import { css } from 'styled-system/css';
@@ -28,8 +28,13 @@ export function CardDossierView({ cardId }: { cardId: number }) {
   const { t, i18n } = useTranslation();
   const { snapshot, now, preferTrained } = useCountdownData();
   const [localTrained, setLocalTrained] = useState<boolean>(preferTrained);
+  const [artStage, setArtStage] = useState(0);
 
   const dossier = useMemo(() => computeCardDossier(snapshot, cardId, now), [snapshot, cardId, now]);
+
+  useEffect(() => {
+    setArtStage(0);
+  }, [cardId, localTrained]);
 
   if (!dossier) {
     return (
@@ -43,7 +48,10 @@ export function CardDossierView({ cardId }: { cardId: number }) {
   const { card, character, event, eventCards, prevCharacterCard, nextCharacterCard } = dossier;
   const hasTraining = card.rarity === 'rarity_3' || card.rarity === 'rarity_4';
   const showTrained = hasTraining ? localTrained : false;
-  const artUrl = cardArtUrl(card, showTrained);
+
+  const tryTrained = artStage < 2 ? showTrained : !showTrained;
+  const tryPng = artStage % 2 === 0;
+  const artUrl = artStage < 4 ? cardArtUrl(card, tryTrained, tryPng) : undefined;
   const attrMeta = ATTRIBUTE_META[card.attr];
 
   return (
@@ -76,6 +84,7 @@ export function CardDossierView({ cardId }: { cardId: number }) {
                 src={artUrl}
                 alt=""
                 referrerPolicy="no-referrer"
+                onError={() => setArtStage((s) => s + 1)}
                 style={{
                   maskImage:
                     'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.06) 14%, rgba(0,0,0,0.28) 30%, rgba(0,0,0,0.66) 50%, rgba(0,0,0,0.92) 70%, rgba(0,0,0,1) 88%)',

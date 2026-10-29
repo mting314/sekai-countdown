@@ -279,22 +279,27 @@ export function CardCutoutRender({
   preferTrained?: boolean;
   height?: number;
 }) {
-  const [fallbackOtherSide, setFallbackOtherSide] = useState(false);
-  const [broken, setBroken] = useState(false);
+  // Cascading stages:
+  // 0: preferred side Lossless PNG (uncompressed 2520x1440 master)
+  // 1: preferred side WebP (compressed fallback)
+  // 2: opposite side Lossless PNG
+  // 3: opposite side WebP
+  // 4: broken
+  const [stage, setStage] = useState(0);
 
   useEffect(() => {
-    setFallbackOtherSide(false);
-    setBroken(false);
+    setStage(0);
   }, [card?.id, preferTrained]);
 
-  if (!card || broken) return null;
+  if (!card || stage >= 4) return null;
 
-  const useTrained = fallbackOtherSide ? !preferTrained : preferTrained;
-  const src = cardArtUrl(card, useTrained);
+  const tryTrained = stage < 2 ? preferTrained : !preferTrained;
+  const tryPng = stage % 2 === 0;
+  const src = cardArtUrl(card, tryTrained, tryPng);
   if (!src) return null;
 
   const fadeMask =
-    'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.06) 14%, rgba(0,0,0,0.28) 30%, rgba(0,0,0,0.66) 50%, rgba(0,0,0,0.92) 70%, rgba(0,0,0,1) 88%)';
+    'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.06) 12%, rgba(0,0,0,0.3) 28%, rgba(0,0,0,0.7) 48%, rgba(0,0,0,0.94) 70%, rgba(0,0,0,1) 88%)';
 
   return (
     <img
@@ -302,16 +307,13 @@ export function CardCutoutRender({
       alt=""
       loading="lazy"
       referrerPolicy="no-referrer"
-      onError={() => {
-        if (!fallbackOtherSide) setFallbackOtherSide(true);
-        else setBroken(true);
-      }}
+      onError={() => setStage((s) => s + 1)}
       style={{
         width: '100%',
         height: '100%',
         display: 'block',
         objectFit: 'cover',
-        objectPosition: 'center 22%',
+        objectPosition: 'center 20%',
         maskImage: fadeMask,
         WebkitMaskImage: fadeMask,
         pointerEvents: 'none',

@@ -102,7 +102,7 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
         position="relative"
         rounded="2xl"
         borderWidth="1px"
-        minH={{ base: '205px', md: '240px' }}
+        minH={{ base: '215px', md: '260px' }}
         p={{ base: '4', md: '6' }}
         bg="bg.subtle"
         overflow="hidden"
@@ -112,7 +112,7 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
           top="0"
           right="0"
           bottom="0"
-          w={{ base: '100%', sm: '78%', md: '70%' }}
+          w={{ base: '100%', sm: '72%', md: '62%' }}
           opacity={{ base: 0.45, sm: 0.98 }}
           pointerEvents="none"
         >
@@ -129,11 +129,11 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
           top="0"
           left="0"
           bottom="0"
-          w={{ base: '82%', sm: '52%', md: '46%' }}
+          w={{ base: '82%', sm: '50%', md: '42%' }}
           pointerEvents="none"
         />
 
-        <Stack position="relative" gap="3.5" maxW={{ base: '100%', sm: '65%' }}>
+        <Stack position="relative" gap="3.5" maxW={{ base: '100%', sm: '62%' }}>
           <HStack gap="2" flexWrap="wrap">
             <Link href={unitHref(character.unit)}>
               <UnitBadge unit={character.unit} />
