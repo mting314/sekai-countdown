@@ -102,38 +102,27 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
         position="relative"
         rounded="2xl"
         borderWidth="1px"
-        minH={{ base: '215px', md: '260px' }}
+        minH={{ base: '205px', md: '230px' }}
         p={{ base: '4', md: '6' }}
         bg="bg.subtle"
         overflow="hidden"
       >
         <Box
+          display="flex"
           position="absolute"
           top="0"
           right="0"
           bottom="0"
-          w={{ base: '100%', sm: '72%', md: '62%' }}
+          justifyContent="flex-end"
+          alignItems="center"
+          height="100%"
           opacity={{ base: 0.45, sm: 0.98 }}
           pointerEvents="none"
         >
           <CardCutoutRender card={dossier.heroCard} preferTrained={preferTrained} />
         </Box>
-        <Box
-          className={css({
-            bgGradient: 'to-r',
-            gradientFrom: 'bg.subtle',
-            gradientVia: 'bg.subtle/75',
-            gradientTo: 'transparent'
-          })}
-          position="absolute"
-          top="0"
-          left="0"
-          bottom="0"
-          w={{ base: '82%', sm: '50%', md: '42%' }}
-          pointerEvents="none"
-        />
 
-        <Stack position="relative" gap="3.5" maxW={{ base: '100%', sm: '62%' }}>
+        <Stack position="relative" gap="3.5" maxW={{ base: '100%', sm: '65%' }}>
           <HStack gap="2" flexWrap="wrap">
             <Link href={unitHref(character.unit)}>
               <UnitBadge unit={character.unit} />

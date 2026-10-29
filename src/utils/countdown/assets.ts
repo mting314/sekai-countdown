@@ -28,11 +28,13 @@ export function cardArtUrl(
 
 export function cardCutoutUrl(
   card: Pick<CompactCard, 'assetbundleName' | 'rarity'> | undefined,
-  preferTrained = true
+  preferTrained = true,
+  preferLosslessPng = true
 ): string | undefined {
   if (!card?.assetbundleName) return undefined;
   const suffix = preferTrained && canBeTrained(card) ? 'after_training' : 'normal';
-  return `${SEKAI_ASSET_CDN}/character/member_cutout/${card.assetbundleName}/${suffix}.webp`;
+  const ext = preferLosslessPng ? 'png' : 'webp';
+  return `${SEKAI_ASSET_CDN}/character/member_cutout/${card.assetbundleName}/${suffix}.${ext}`;
 }
 
 export function eventStoryBannerUrl(

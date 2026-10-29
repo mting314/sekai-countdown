@@ -315,11 +315,14 @@ function PodiumCategoryCard({
         overflow="hidden"
       >
         <Box
+          display="flex"
           position="absolute"
           top="0"
           right="0"
           bottom="0"
-          w="66%"
+          justifyContent="flex-end"
+          alignItems="center"
+          height="100%"
           opacity={0.92}
           pointerEvents="none"
         >

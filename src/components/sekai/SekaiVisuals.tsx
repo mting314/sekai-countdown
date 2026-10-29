@@ -12,6 +12,7 @@ import type {
 import {
   attributeIconUrl,
   cardArtUrl,
+  cardCutoutUrl,
   cardThumbUrl,
   characterIconUrl,
   eventLogoUrl,
@@ -273,33 +274,40 @@ export function CardThumbTile({
  */
 export function CardCutoutRender({
   card,
-  preferTrained = true
+  preferTrained = true,
+  height
 }: {
   card?: CompactCard;
   preferTrained?: boolean;
   height?: number;
 }) {
   // Cascading stages:
-  // 0: preferred side Lossless PNG (uncompressed 2520x1440 master)
-  // 1: preferred side WebP (compressed fallback)
-  // 2: opposite side Lossless PNG
-  // 3: opposite side WebP
-  // 4: broken
+  // 0: member_cutout PNG (preferred side, crisp portrait crop)
+  // 1: member_cutout WebP (preferred side)
+  // 2: member_cutout PNG (opposite side)
+  // 3: member_cutout WebP (opposite side)
+  // 4: card full art PNG (preferred side)
+  // 5: card full art WebP (preferred side)
   const [stage, setStage] = useState(0);
 
   useEffect(() => {
     setStage(0);
   }, [card?.id, preferTrained]);
 
-  if (!card || stage >= 4) return null;
+  if (!card || stage >= 6) return null;
 
-  const tryTrained = stage < 2 ? preferTrained : !preferTrained;
-  const tryPng = stage % 2 === 0;
-  const src = cardArtUrl(card, tryTrained, tryPng);
+  const isCutout = stage < 4;
+  const useTrained = stage < 2 || (stage >= 4 && stage < 5) ? preferTrained : !preferTrained;
+  const usePng = stage % 2 === 0;
+
+  const src = isCutout
+    ? cardCutoutUrl(card, useTrained, usePng)
+    : cardArtUrl(card, useTrained, usePng);
+
   if (!src) return null;
 
   const fadeMask =
-    'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.06) 12%, rgba(0,0,0,0.3) 28%, rgba(0,0,0,0.7) 48%, rgba(0,0,0,0.94) 70%, rgba(0,0,0,1) 88%)';
+    'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.1) 14%, rgba(0,0,0,0.55) 36%, black 65%)';
 
   return (
     <img
@@ -309,11 +317,11 @@ export function CardCutoutRender({
       referrerPolicy="no-referrer"
       onError={() => setStage((s) => s + 1)}
       style={{
-        width: '100%',
-        height: '100%',
-        display: 'block',
+        height: height ?? '100%',
+        width: 'auto',
+        maxWidth: '100%',
         objectFit: 'cover',
-        objectPosition: 'center 20%',
+        objectPosition: isCutout ? 'center center' : 'center 20%',
         maskImage: fadeMask,
         WebkitMaskImage: fadeMask,
         pointerEvents: 'none',
