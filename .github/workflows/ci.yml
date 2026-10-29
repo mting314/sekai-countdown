@@ -28,7 +28,5 @@ jobs:
       - name: Unit Test
         run: bun ci:test
       - name: 'Report Coverage'
-        # Set if: always() to also generate the report if tests are failing
-        # Only works if you set `reportOnFailure: true` in your vite config as specified above
-        if: always()
+        if: github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
