@@ -11,6 +11,9 @@ Deploys to `https://mting314.github.io/sekai-countdown/` via GitHub Pages (`depl
 | `/` | **Overview Hub**: Live/upcoming JP event countdown banner, 6-category transparent card-cutout podiums, active all-time record waits, and a 26-character `@countdown_prsk` quick grid |
 | `/focus` | **Focus & Rotation**: 5-unit focus pacing, per-unit Cycle 1→N matrix with Cycle Jump / Queue Jump badges, waiting-member highlights, and Hakolim toggle |
 | `/cards` | **4★ & Lim Jail**: Hairstyle Lim 4★ (with World Link & Collab toggles), Any 4★, ColorFes & BloomFes (plus the BloomFes Waiting Room), Permanent 4★, and Event 3★/2★ |
+| `/cards/:id` | **Card Dossier**: Full HD trained/normal card art, attributes, gacha supply, broken drought clocks, and direct sekai.best link |
+| `/events/:id` | **Event Dossier**: Full HD event screen art, rotation cycle status, cycle jumps, debut cards & commissioned song, and direct sekai.best link |
+| `/units/:id` | **Unit Dossier**: Unit roster, all members side-by-side with 5-attribute card matrices, and focus rotation pacing |
 | `/virtual-singers` | **Virtual Singers**: Unit-focus VS 4★ / card / commissioned-song vocal slots, 6×5 SEKAI sub-unit matrix (`supportUnit`), and dedicated VS banner focuses |
 | `/mixed-attrs` | **Mixed & Attributes**: 26×5 card attribute starvation heatmap (All 4★ vs. Lim 4★) and Mixed event banner/lineup droughts |
 | `/extras` | **Songs, Duos & Stamps**: Another Vocal cover droughts, unit song/3DMV/2DMV pacing, Co-4★ Banner Duo explorer, and character illustration stamp droughts |
