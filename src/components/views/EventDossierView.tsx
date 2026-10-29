@@ -13,7 +13,7 @@ import {
 import { Link } from '~/components/ui/link';
 import { Text } from '~/components/ui/text';
 import { useCountdownData } from '~/context/CountdownDataContext';
-import { eventLogoUrl, eventStoryBannerUrl } from '~/utils/countdown/assets';
+import { eventBgUrl, eventLogoUrl, eventStoryBannerUrl } from '~/utils/countdown/assets';
 import { computeEventDossier } from '~/utils/countdown/drought-break';
 import {
   charDisplayName,
@@ -59,7 +59,7 @@ export function EventDossierView({ eventId }: { eventId: number }) {
 
   const leadChar = focusCharacter ?? bannerCharacter;
   const leadColor = leadChar?.color ?? '#ff6090';
-  const bannerUrl = eventStoryBannerUrl(event);
+  const bannerUrl = eventBgUrl(event.assetbundleName) ?? eventStoryBannerUrl(event);
   const logoUrl = eventLogoUrl(event.assetbundleName);
 
   return (

@@ -23,7 +23,7 @@ import { Button } from '~/components/ui/styled/button';
 import { Text } from '~/components/ui/text';
 import { useCountdownData } from '~/context/CountdownDataContext';
 import type { CompactCard, CompactEvent, DroughtClock } from '~/types/countdown';
-import { eventCharacterRenderUrl, eventStoryBannerUrl } from '~/utils/countdown/assets';
+import { eventBgUrl, eventCharacterRenderUrl, eventStoryBannerUrl } from '~/utils/countdown/assets';
 import {
   charDisplayName,
   formatDateShort,
@@ -72,7 +72,9 @@ function HeroEventBanner({
     return () => window.clearInterval(id);
   }, []);
 
-  const bannerUrl = noBanner ? undefined : eventStoryBannerUrl(event);
+  const bannerUrl = noBanner
+    ? undefined
+    : (eventBgUrl(event.assetbundleName) ?? eventStoryBannerUrl(event));
   const charRenderUrl = noCharRender ? undefined : eventCharacterRenderUrl(event.assetbundleName);
   const cards = event.cardIds
     .map((id) => cardById.get(id))
