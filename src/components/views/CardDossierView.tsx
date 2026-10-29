@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BiChevronLeft, BiChevronRight, BiExpandAlt } from 'react-icons/bi';
+import { BiChevronLeft, BiChevronRight, BiExpandAlt, BiLinkExternal } from 'react-icons/bi';
 import { css } from 'styled-system/css';
 import { Box, Flex, Grid, HStack, Stack, Wrap } from 'styled-system/jsx';
 import { SeverityPill } from '~/components/sekai/DroughtVisuals';
@@ -341,6 +341,30 @@ export function CardDossierView({ cardId }: { cardId: number }) {
                 <span>{t('card_page.open_full_art')}</span>
               </a>
             )}
+
+            <a
+              href={`https://sekai.best/card/${card.id}`}
+              target="_blank"
+              rel="noreferrer"
+              className={css({
+                display: 'inline-flex',
+                gap: '1',
+                alignItems: 'center',
+                borderColor: 'border.default',
+                rounded: 'lg',
+                borderWidth: '1px',
+                py: '1.2',
+                px: '2.5',
+                fontSize: 'xs',
+                fontWeight: 'bold',
+                bg: 'bg.default/80',
+                _hover: { textDecoration: 'none', bg: 'bg.muted' }
+              })}
+              title="View on Sekai Viewer (sekai.best)"
+            >
+              <BiLinkExternal size={14} />
+              <span>sekai.best</span>
+            </a>
           </HStack>
 
           {/* Prev / Next Character 4★ Switcher */}

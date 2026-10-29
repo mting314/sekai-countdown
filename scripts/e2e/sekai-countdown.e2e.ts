@@ -355,6 +355,8 @@ async function runDesktop(baseUrl: string, browser: Browser) {
       cardText.includes('Droughts Broken by This Card') &&
       cardText.includes('Debut Event & Banner Lineup')
   );
+  const cardSekaiBestLink = page.locator('a[href="https://sekai.best/card/1011"]');
+  check('Desktop /cards/1011: has sekai.best external link', (await cardSekaiBestLink.count()) === 1);
   await checkRemoteImages(page, 'Desktop /cards/1011');
   await checkNoHorizontalOverflow(page, 'Desktop /cards/1011');
   await page.screenshot({ path: `${OUT}/desktop-10-card-1011.png`, fullPage: true });
@@ -367,6 +369,8 @@ async function runDesktop(baseUrl: string, browser: Browser) {
     'Desktop /events/145: renders Event Dossier with lineup & rotation status',
     ev145Text.includes('mizu5') && ev145Text.includes('Event Card Lineup')
   );
+  const eventSekaiBestLink = page.locator('a[href="https://sekai.best/event/145"]');
+  check('Desktop /events/145: has sekai.best external link', (await eventSekaiBestLink.count()) === 1);
   await checkRemoteImages(page, 'Desktop /events/145');
   await checkNoHorizontalOverflow(page, 'Desktop /events/145');
   await page.screenshot({ path: `${OUT}/desktop-11-event-145-mizu5.png`, fullPage: true });
