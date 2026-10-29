@@ -26,6 +26,7 @@
     "events_ago": "{{count}} events ago",
     "avg_gap": "Avg {{days}}d",
     "max_gap": "Max {{days}}d",
+    "prev_max_gap": "Prev max {{days}}d",
     "record_wait": "NEW RECORD",
     "upcoming_reset": "Upcoming!",
     "never": "Never",

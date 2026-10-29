@@ -616,7 +616,7 @@ export function OverviewHub() {
                       </span>
                     </span>
                     <span className={css({ color: 'fg.muted', fontSize: '2xs' })}>
-                      {label} ({t('common.max_gap', { days: clock.maxGapDays })})
+                      {label} ({t('common.prev_max_gap', { days: clock.maxGapDays })})
                     </span>
                   </Stack>
                 </Link>

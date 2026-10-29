@@ -26,6 +26,7 @@
     "events_ago": "{{count}}イベ前",
     "avg_gap": "平均 {{days}}日",
     "max_gap": "過去最長 {{days}}日",
+    "prev_max_gap": "過去最長 {{days}}日",
     "record_wait": "最長記録更新中",
     "upcoming_reset": "次回予告済!",
     "never": "未実装",
