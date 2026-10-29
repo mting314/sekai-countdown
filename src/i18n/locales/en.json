@@ -126,12 +126,33 @@
     "alt_vocal": "Another Vocal Cover",
     "stamp": "Illustration Stamp"
   },
+  "clock_tooltips": {
+    "vs_unit_4star": "Virtual Singer 4★ gacha card slot featured on an original-unit focus event. In each main unit focus event, one Virtual Singer receives a 4★ card belonging to that SEKAI.",
+    "vs_unit_song": "Virtual Singer commissioned song vocal slot for an original-unit event song.",
+    "hakolim": "Limited Focus Event (箱限定 / ハコリム) featuring hairstyle-limited 4★ cards for unit members.",
+    "solo_focus": "Unit event centered on this character with their banner card and commissioned song.",
+    "lim_4star": "Hairstyle-limited 4★ cards (Seasonal, Fes, Hakolim, or Collab) that feature special hairstyles.",
+    "mixed_banner": "Lead banner character illustration for a mixed/shuffle event."
+  },
   "dossier": {
     "all_clocks": "All Active Drought Clocks",
     "attr_ring": "4★ Attribute Breakdown",
     "sekai_subunits": "SEKAI Sub-Unit 4★ Breakdown",
     "timeline_title": "4★ Release & Gap History",
+    "filter_all": "All Units",
+    "filter_by_unit": "Filter by Sub-Unit:",
     "back_overview": "All Characters"
+  },
+  "unit_page": {
+    "all_members": "All Unit Members",
+    "all_members_sub": "Compare all members' current drought clocks and focus rotation progress on one page.",
+    "attr_matrix": "Unit 5-Attribute 4★ Matrix",
+    "attr_matrix_sub": "Latest 4★ card and drought duration for each member across all 5 attributes.",
+    "pairings": "Same-Unit Co-4★ Banner Pairings",
+    "pairings_sub": "Days elapsed since each pair of unitmates shared a 4★ gacha banner.",
+    "focus_history": "Unit Focus & Hakolim History",
+    "cycle_indicator": "Cycle #{{cycle}}",
+    "switch_unit": "Switch Unit:"
   },
   "search": {
     "button": "Search",
@@ -158,6 +179,43 @@
     "in_days": "in {{count}}d",
     "live_now": "LIVE",
     "hint_nav": "↑↓ navigate · Enter open · Esc close"
+  },
+  "card_page": {
+    "droughts_broken": "Droughts Broken by This Card",
+    "droughts_broken_sub": "How many days & events this card ended across every category at the moment it released.",
+    "duo_breaks": "Co-4★ Banner Pairings Broken",
+    "event_lineup": "Debut Event & Banner Lineup",
+    "untrained": "Untrained",
+    "trained": "Trained",
+    "open_full_art": "Full Art",
+    "first_ever": "1st Debut",
+    "since_launch": "{{count}}d since JP Launch",
+    "broke_record": "Broke Prior Record",
+    "all_time_max": "All-Time Longest Gap",
+    "fast_turnaround": "Quick Turnaround",
+    "prev_in_cat": "Previous",
+    "next_in_cat": "Next (+{{count}}d)",
+    "still_latest": "Still Latest · {{count}}d active",
+    "prev_char_card": "Prev {{char}} {{rarity}}",
+    "next_char_card": "Next {{char}} {{rarity}}",
+    "ordinal_of": "#{{ord}} of {{total}}"
+  },
+  "event_page": {
+    "event_droughts": "Event & Rotation Droughts Broken",
+    "event_droughts_sub": "Focus, unit, Hakolim, and Virtual Singer waits ended when this event started.",
+    "rotation_context": "Focus Rotation & Jump Status",
+    "cycle_label": "Focus Cycle #{{cycle}}",
+    "cycle_jump_desc": "Entered Cycle #{{cycle}} while unitmates were still waiting on Cycle #{{prev}}:",
+    "queue_jump_desc": "Received Cycle #{{cycle}} ahead of unitmates who finished Cycle #{{prev}} earlier:",
+    "on_schedule_desc": "Released in normal cycle order with no rotation jump.",
+    "waiting_after": "Still waiting in cycle after this event:",
+    "all_caught_up": "Completed the unit's Focus Cycle #{{cycle}}!",
+    "duo_breaks": "Co-4★ Banner Duo Droughts Broken",
+    "lineup_title": "Event Card Lineup & Card Droughts Broken",
+    "featured_song": "Featured Event Song",
+    "view_card_dossier": "Card Dossier →",
+    "prev_event": "Prev Event",
+    "next_event": "Next Event"
   },
   "error_page": {
     "not_found": "This page doesn't exist.",

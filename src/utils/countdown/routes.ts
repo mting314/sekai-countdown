@@ -9,3 +9,6 @@ export const virtualSingersHref = () => routeHref('/virtual-singers');
 export const mixedAttrsHref = () => routeHref('/mixed-attrs');
 export const extrasHref = () => routeHref('/extras');
 export const characterHref = (id: number | string) => routeHref(`/characters/${id}`);
+export const cardHref = (id: number | string) => routeHref(`/cards/${id}`);
+export const eventHref = (id: number | string) => routeHref(`/events/${id}`);
+export const unitHref = (id: string) => routeHref(`/units/${id}`);

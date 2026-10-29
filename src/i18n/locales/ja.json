@@ -126,12 +126,33 @@
     "alt_vocal": "アナザーボーカル",
     "stamp": "イラストスタンプ"
   },
+  "clock_tooltips": {
+    "vs_unit_4star": "オリジナルユニットの箱イベントに登場するバーチャル・シンガーの★4枠。各ユニットの箱イベントでは該当セカイのバーチャル・シンガー1名が★4ガチャ枠に選ばれます。",
+    "vs_unit_song": "オリジナルユニットの箱イベント書き下ろし楽曲のバーチャル・シンガー歌唱枠。",
+    "hakolim": "ユニットメンバーの髪型付き限定★4が実装される箱イベント（箱限定・ハコリム）。",
+    "solo_focus": "このキャラクターがバナー・書き下ろし楽曲の中心となるユニット箱イベント。",
+    "lim_4star": "ヘアスタイル（髪型）が付く限定★4カード（季節限定・フェス・箱限定・コラボ）。",
+    "mixed_banner": "混合（シャッフル）イベントのバナーイラストを飾るリーダー枠。"
+  },
   "dossier": {
     "all_clocks": "全カテゴリ経過日数一覧",
     "attr_ring": "5属性★4内訳",
     "sekai_subunits": "セカイ別サブユニット★4内訳",
     "timeline_title": "★4カード実装＆間隔ヒストリー",
+    "filter_all": "すべてのユニット",
+    "filter_by_unit": "セカイ別絞り込み:",
     "back_overview": "一覧に戻る"
+  },
+  "unit_page": {
+    "all_members": "ユニット所属メンバー一覧",
+    "all_members_sub": "ユニット全メンバーの未実装カウントダウンと箱イベ周回状況を1ページでまとめて比較できます。",
+    "attr_matrix": "ユニット5属性★4マトリクス",
+    "attr_matrix_sub": "各メンバーの5属性別最新★4カードと経過日数一覧。",
+    "pairings": "同一ユニット内★4共演ペア一覧",
+    "pairings_sub": "ユニットメンバー同士が同一ガチャで★4共演してからの経過日数。",
+    "focus_history": "ユニット箱イベ＆箱限定ヒストリー",
+    "cycle_indicator": "{{cycle}}周目",
+    "switch_unit": "ユニット切替:"
   },
   "search": {
     "button": "検索",
@@ -158,6 +179,43 @@
     "in_days": "あと{{count}}日",
     "live_now": "開催中",
     "hint_nav": "↑↓ 選択 · Enter 移動 · Esc 閉じる"
+  },
+  "card_page": {
+    "droughts_broken": "このカードが解消した未実装ブランク",
+    "droughts_broken_sub": "実装時点で各カテゴリにおいて何日ぶり（何イベぶり）の登場だったかを表示します。",
+    "duo_breaks": "同時★4ピックアップ組み合わせブランク解消",
+    "event_lineup": "登場イベント＆同時実装カード",
+    "untrained": "特訓前",
+    "trained": "特訓後",
+    "open_full_art": "イラスト拡大",
+    "first_ever": "初実装",
+    "since_launch": "リリースから{{count}}日",
+    "broke_record": "過去最長更新",
+    "all_time_max": "歴代最長ブランク",
+    "fast_turnaround": "短期間再登場",
+    "prev_in_cat": "前回",
+    "next_in_cat": "次回 (+{{count}}日)",
+    "still_latest": "現在も最新 · {{count}}日経過中",
+    "prev_char_card": "前の{{char}}{{rarity}}",
+    "next_char_card": "次の{{char}}{{rarity}}",
+    "ordinal_of": "{{ord}}枚目 / 全{{total}}枚"
+  },
+  "event_page": {
+    "event_droughts": "このイベントが解消したローテ・期間ブランク",
+    "event_droughts_sub": "イベント開催時点で解消されたバナー・箱限定・ユニット・バチャシン枠の経過日数。",
+    "rotation_context": "箱イベ周回＆ローテ飛び越し判定",
+    "cycle_label": "箱イベ {{cycle}}周目",
+    "cycle_jump_desc": "他メンバーが{{prev}}周目未消化の状態で{{cycle}}周目に突入（周回飛び越し）:",
+    "queue_jump_desc": "先に{{prev}}周目を終えていたメンバーより先に{{cycle}}周目を消化（順番前後）:",
+    "on_schedule_desc": "周回・順番の飛び越しなし（順当消化）。",
+    "waiting_after": "このイベ終了時点の同周回未消化メンバー:",
+    "all_caught_up": "このイベントでユニット全員が{{cycle}}周目を完走！",
+    "duo_breaks": "同時★4ピックアップペアのブランク解消",
+    "lineup_title": "実装カード一覧＆カード別ブランク解消",
+    "featured_song": "イベント書き下ろし・対象楽曲",
+    "view_card_dossier": "カード詳細 →",
+    "prev_event": "前のイベント",
+    "next_event": "次のイベント"
   },
   "error_page": {
     "not_found": "ページが見つかりません。",

@@ -310,13 +310,100 @@ async function runDesktop(baseUrl: string, browser: Browser) {
     'Desktop /characters/21: renders Virtual Singer SEKAI sub-unit breakdown',
     mikuText.includes('Miku') && mikuText.includes('SEKAI Sub-Unit 4★ Breakdown')
   );
+
+  // Test tooltip hover on Unit-Focus 4★ Slot
+  const infoTooltipTrigger = page.locator('button[aria-label="Info for Unit-Focus 4★ Slot"]').first();
+  if ((await infoTooltipTrigger.count()) === 1) {
+    await infoTooltipTrigger.hover();
+    await page.waitForTimeout(200);
+    const tooltipContent = page.getByRole('tooltip');
+    check(
+      'Desktop /characters/21: Info tooltip displays explanation on hover',
+      (await tooltipContent.count()) > 0
+    );
+  }
+
+  // Test sub-unit filter buttons for Virtual Singer
+  const n25FilterBtn = page.getByRole('button', { name: /Nightcord at 25:00|N25/i }).first();
+  if ((await n25FilterBtn.count()) === 1) {
+    await n25FilterBtn.click();
+    await page.waitForTimeout(200);
+    const filteredText = await page.locator('body').innerText();
+    check(
+      'Desktop /characters/21: Sub-unit filter filters timeline by N25',
+      filteredText.includes('4★ Release & Gap History')
+    );
+    await page.screenshot({
+      path: `${OUT}/desktop-15-character-21-miku-n25-filter.png`,
+      fullPage: false
+    });
+  }
+
   await page.screenshot({ path: `${OUT}/desktop-07b-character-21-miku.png`, fullPage: false });
 
   await page.goto(`${baseUrl}/characters/12`, { waitUntil: 'networkidle' });
   await waitImagesSettled(page);
   await page.screenshot({ path: `${OUT}/desktop-07c-character-12-toya.png`, fullPage: false });
 
-  // 8. Japanese locale + Light mode verification
+  // 8. Card Dossier (/cards/1011 - Mizuki 4★ from Event #145)
+  await page.goto(`${baseUrl}/cards/1011`, { waitUntil: 'networkidle' });
+  await waitImagesSettled(page);
+  const cardText = await page.locator('body').innerText();
+  check(
+    'Desktop /cards/1011: renders Card Dossier with broken droughts',
+    cardText.includes('Mizuki Akiyama') &&
+      cardText.includes('Droughts Broken by This Card') &&
+      cardText.includes('Debut Event & Banner Lineup')
+  );
+  await checkRemoteImages(page, 'Desktop /cards/1011');
+  await checkNoHorizontalOverflow(page, 'Desktop /cards/1011');
+  await page.screenshot({ path: `${OUT}/desktop-10-card-1011.png`, fullPage: true });
+
+  // 9. First-Class Event Dossier (/events/145 mizu5 & /events/147 saki6 cycle jump)
+  await page.goto(`${baseUrl}/events/145`, { waitUntil: 'networkidle' });
+  await waitImagesSettled(page);
+  const ev145Text = await page.locator('body').innerText();
+  check(
+    'Desktop /events/145: renders Event Dossier with lineup & rotation status',
+    ev145Text.includes('mizu5') && ev145Text.includes('Event Card Lineup')
+  );
+  await checkRemoteImages(page, 'Desktop /events/145');
+  await checkNoHorizontalOverflow(page, 'Desktop /events/145');
+  await page.screenshot({ path: `${OUT}/desktop-11-event-145-mizu5.png`, fullPage: true });
+
+  await page.goto(`${baseUrl}/events/147`, { waitUntil: 'networkidle' });
+  await waitImagesSettled(page);
+  const ev147Text = await page.locator('body').innerText();
+  check(
+    'Desktop /events/147: detects rotation cycle jump (Saki jumped in Cycle 6)',
+    ev147Text.includes('saki6') && ev147Text.includes('Cycle Jump')
+  );
+  await checkNoHorizontalOverflow(page, 'Desktop /events/147');
+  await page.screenshot({ path: `${OUT}/desktop-12-event-147-saki6.png`, fullPage: false });
+
+  // 10. Unit Dossier (/units/nightcord & /units/vivid_bad_squad)
+  await page.goto(`${baseUrl}/units/nightcord`, { waitUntil: 'networkidle' });
+  await waitImagesSettled(page);
+  const unitText = await page.locator('body').innerText();
+  check(
+    'Desktop /units/nightcord: renders all 4 members side-by-side',
+    unitText.includes('Nightcord at 25:00') &&
+      unitText.includes('Kanade') &&
+      unitText.includes('Mafuyu') &&
+      unitText.includes('Ena') &&
+      unitText.includes('Mizuki') &&
+      unitText.includes('Same-Unit Co-4★ Banner Pairings')
+  );
+  await checkRemoteImages(page, 'Desktop /units/nightcord');
+  await checkNoHorizontalOverflow(page, 'Desktop /units/nightcord');
+  await page.screenshot({ path: `${OUT}/desktop-13-unit-nightcord.png`, fullPage: true });
+
+  await page.goto(`${baseUrl}/units/vivid_bad_squad`, { waitUntil: 'networkidle' });
+  await waitImagesSettled(page);
+  await checkNoHorizontalOverflow(page, 'Desktop /units/vivid_bad_squad');
+  await page.screenshot({ path: `${OUT}/desktop-14-unit-vbs.png`, fullPage: false });
+
+  // 11. Japanese locale + Light mode verification
   await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
   await page.evaluate(() => {
     localStorage.setItem('i18nextLng', 'ja');
@@ -366,7 +453,10 @@ async function runMobile(baseUrl: string, browser: Browser) {
     { path: '/virtual-singers' },
     { path: '/mixed-attrs' },
     { path: '/extras' },
-    { path: '/characters/20', shot: 'mobile-07-character-20.png' }
+    { path: '/characters/20', shot: 'mobile-07-character-20.png' },
+    { path: '/units/nightcord', shot: 'mobile-13-unit-nightcord.png' },
+    { path: '/events/145', shot: 'mobile-11-event-145.png' },
+    { path: '/cards/1011', shot: 'mobile-10-card-1011.png' }
   ];
 
   for (const r of mobileRoutes) {

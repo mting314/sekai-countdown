@@ -13,11 +13,18 @@ import {
   StampTile,
   UnitBadge
 } from '~/components/sekai/SekaiVisuals';
+import { InfoTooltip } from '~/components/ui/InfoTooltip';
 import { Link } from '~/components/ui/link';
 import { Text } from '~/components/ui/text';
 import { useCountdownData } from '~/context/CountdownDataContext';
-import { cardArtUrl } from '~/utils/countdown/assets';
-import { ATTRIBUTE_META, SUPPLY_BADGE_META } from '~/utils/countdown/constants';
+import type { SekaiUnitId } from '~/types/countdown';
+import { cardArtUrl, unitIconUrl } from '~/utils/countdown/assets';
+import {
+  ATTRIBUTE_META,
+  MAIN_UNITS,
+  SUPPLY_BADGE_META,
+  UNIT_META
+} from '~/utils/countdown/constants';
 import {
   charDisplayName,
   formatDateShort,
@@ -25,13 +32,14 @@ import {
   SEVERITY_PALETTE
 } from '~/utils/countdown/format';
 import { computeCharacterDossier } from '~/utils/countdown/metrics';
-import { characterHref, homeHref } from '~/utils/countdown/routes';
+import { cardHref, characterHref, eventHref, homeHref, unitHref } from '~/utils/countdown/routes';
 import { matchesTokens, normalizeSearchText, tokenizeQuery } from '~/utils/countdown/search';
 
 export function CharacterDossierView({ characterId }: { characterId: number }) {
   const { t, i18n } = useTranslation();
   const { snapshot, now, preferTrained, cardById, musicById, stampById } = useCountdownData();
   const [timelineQuery, setTimelineQuery] = useState('');
+  const [subUnitFilter, setSubUnitFilter] = useState<string>('all');
 
   const dossier = useMemo(
     () => computeCharacterDossier(snapshot, characterId, now),
@@ -40,9 +48,13 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
 
   const filteredTimeline = useMemo(() => {
     if (!dossier) return [];
+    let list = dossier.timeline;
+    if (dossier.character.unit === 'virtual_singer' && subUnitFilter !== 'all') {
+      list = list.filter((item) => item.card?.supportUnit === subUnitFilter);
+    }
     const tokens = tokenizeQuery(timelineQuery);
-    if (tokens.length === 0) return dossier.timeline;
-    return dossier.timeline.filter((item) => {
+    if (tokens.length === 0) return list;
+    return list.filter((item) => {
       const card = item.card;
       if (!card) return false;
       const aMeta = ATTRIBUTE_META[card.attr];
@@ -64,7 +76,7 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
       );
       return matchesTokens(hay, tokens);
     });
-  }, [dossier, timelineQuery]);
+  }, [dossier, timelineQuery, subUnitFilter]);
 
   if (!dossier) {
     return (
@@ -123,7 +135,9 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
 
         <Stack position="relative" gap="3.5" maxW={{ base: '100%', sm: '65%' }}>
           <HStack gap="2" flexWrap="wrap">
-            <UnitBadge unit={character.unit} />
+            <Link href={unitHref(character.unit)}>
+              <UnitBadge unit={character.unit} />
+            </Link>
             <span
               className={css({
                 rounded: 'md',
@@ -230,9 +244,27 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
               >
                 <Stack gap="2.5">
                   <HStack justifyContent="space-between" alignItems="flex-start">
-                    <Text color="fg.muted" fontSize="xs" fontWeight="bold">
-                      {t(labelKey, { defaultValue: defaultLabel })}
-                    </Text>
+                    {(() => {
+                      const cleanKey = key.replace(/^char_/, '');
+                      const directKey = `clock_tooltips.${key}` as any;
+                      const fallbackKey = `clock_tooltips.${cleanKey}` as any;
+                      const hasDirect = i18n.exists(directKey);
+                      const hasFallback = i18n.exists(fallbackKey);
+                      const tooltipText: string | undefined = hasDirect
+                        ? String(t(directKey))
+                        : hasFallback
+                          ? String(t(fallbackKey))
+                          : undefined;
+
+                      return (
+                        <HStack gap="1.5" alignItems="center">
+                          <Text color="fg.muted" fontSize="xs" fontWeight="bold">
+                            {t(labelKey as any, { defaultValue: defaultLabel })}
+                          </Text>
+                          {tooltipText && <InfoTooltip text={tooltipText} label={defaultLabel} />}
+                        </HStack>
+                      );
+                    })()}
                     <SeverityPill clock={clock} />
                   </HStack>
 
@@ -240,7 +272,9 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
                     {stamp ? (
                       <StampTile stamp={stamp} size={48} />
                     ) : card ? (
-                      <CardThumbTile card={card} preferTrained={preferTrained} size={48} />
+                      <Link className={css({ flexShrink: 0 })} href={cardHref(card.id)}>
+                        <CardThumbTile card={card} preferTrained={preferTrained} size={48} />
+                      </Link>
                     ) : song ? (
                       <SongJacketTile music={song} size={48} />
                     ) : null}
@@ -257,22 +291,41 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
                       >
                         {t('common.days', { count: clock.daysSince })}
                       </span>
-                      <span
-                        className={css({
-                          fontSize: 'xs',
-                          textOverflow: 'ellipsis',
-                          overflow: 'hidden',
-                          whiteSpace: 'nowrap'
-                        })}
-                      >
-                        {clock.latest
-                          ? localizedTitle(
-                              clock.latest.labelJa,
-                              clock.latest.labelEn,
-                              i18n.language
-                            )
-                          : t('common.never')}
-                      </span>
+                      {card ? (
+                        <Link
+                          className={css({
+                            fontSize: 'xs',
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            _hover: { textDecoration: 'underline' }
+                          })}
+                          href={cardHref(card.id)}
+                        >
+                          {localizedTitle(
+                            clock.latest?.labelJa ?? '',
+                            clock.latest?.labelEn,
+                            i18n.language
+                          )}
+                        </Link>
+                      ) : (
+                        <span
+                          className={css({
+                            fontSize: 'xs',
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap'
+                          })}
+                        >
+                          {clock.latest
+                            ? localizedTitle(
+                                clock.latest.labelJa,
+                                clock.latest.labelEn,
+                                i18n.language
+                              )
+                            : t('common.never')}
+                        </span>
+                      )}
                       <span className={css({ color: 'fg.muted', fontSize: '2xs' })}>
                         {formatDateShort(clock.lastTimestamp, i18n.language)}
                       </span>
@@ -430,6 +483,62 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
           />
         </Flex>
 
+        {character.unit === 'virtual_singer' && (
+          <HStack gap="1.5" pt="0.5" flexWrap="wrap">
+            <Text color="fg.muted" fontSize="xs" fontWeight="bold">
+              {t('dossier.filter_by_unit')}
+            </Text>
+            {(['all', ...MAIN_UNITS] as const).map((u) => {
+              const active = subUnitFilter === u;
+              const uMeta = u !== 'all' ? UNIT_META[u as SekaiUnitId] : undefined;
+              return (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => setSubUnitFilter(u)}
+                  className={
+                    active
+                      ? css({
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          gap: '1',
+                          alignItems: 'center',
+                          rounded: 'full',
+                          borderWidth: '1px',
+                          py: '0.5',
+                          px: '2.5',
+                          fontSize: 'xs',
+                          fontWeight: 'extrabold',
+                          bg: 'bg.default'
+                        })
+                      : css({
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          gap: '1',
+                          alignItems: 'center',
+                          borderColor: 'border.default',
+                          rounded: 'full',
+                          borderWidth: '1px',
+                          py: '0.5',
+                          px: '2.5',
+                          fontSize: 'xs',
+                          fontWeight: 'medium',
+                          bg: 'bg.subtle',
+                          _hover: { bg: 'bg.muted' }
+                        })
+                  }
+                  style={active && uMeta ? { borderColor: uMeta.color } : undefined}
+                >
+                  {uMeta && (
+                    <img src={unitIconUrl(u as SekaiUnitId)} alt="" width={14} height={14} />
+                  )}
+                  <span>{u === 'all' ? t('dossier.filter_all') : uMeta?.shortEn}</span>
+                </button>
+              );
+            })}
+          </HStack>
+        )}
+
         {filteredTimeline.length === 0 ? (
           <EmptyFilterState query={timelineQuery} onClear={() => setTimelineQuery('')} />
         ) : (
@@ -437,6 +546,12 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
             {filteredTimeline.map((item) => {
               const card = item.card!;
               const art = cardArtUrl(card, preferTrained);
+              const evFocusCharId = item.event?.focusCharacterId || item.event?.bannerCharacterId;
+              const evFocusChar = evFocusCharId
+                ? snapshot.characters.find((c) => c.id === evFocusCharId)
+                : undefined;
+              const evCharColor = evFocusChar?.color ?? character.color;
+
               return (
                 <Box
                   key={card.id}
@@ -479,31 +594,62 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
                     flexWrap="wrap"
                   >
                     <HStack gap="3">
-                      <CardThumbTile card={card} preferTrained={preferTrained} size={50} />
+                      <Link className={css({ flexShrink: 0 })} href={cardHref(card.id)}>
+                        <CardThumbTile card={card} preferTrained={preferTrained} size={50} />
+                      </Link>
                       <Stack gap="0.5">
                         <HStack gap="1.5" flexWrap="wrap">
                           {item.event?.nickname && (
-                            <span
+                            <Link
                               className={css({
                                 rounded: 'sm',
+                                borderWidth: '1px',
                                 py: '0.5',
                                 px: '1.5',
+                                textDecoration: 'none',
                                 fontSize: '2xs',
                                 fontWeight: 'bold',
-                                bg: 'bg.muted'
+                                lineHeight: '1.2',
+                                transition: 'opacity 0.15s ease',
+                                _hover: { opacity: 0.8 }
                               })}
+                              href={eventHref(item.event.id)}
+                              style={{
+                                borderColor: `${evCharColor}88`,
+                                color: evCharColor,
+                                backgroundColor: `${evCharColor}18`
+                              }}
                             >
                               {item.event.nickname}
-                            </span>
+                            </Link>
                           )}
-                          <span className={css({ fontSize: 'sm', fontWeight: 'bold' })}>
+                          <Link
+                            className={css({
+                              color: 'fg.default',
+                              fontSize: 'sm',
+                              fontWeight: 'bold',
+                              _hover: { textDecoration: 'underline' }
+                            })}
+                            href={cardHref(card.id)}
+                          >
                             {localizedTitle(card.prefixJa, card.prefixEn, i18n.language)}
-                          </span>
+                          </Link>
                         </HStack>
                         <span className={css({ color: 'fg.muted', fontSize: 'xs' })}>
-                          {item.event
-                            ? localizedTitle(item.event.nameJa, item.event.nameEn, i18n.language)
-                            : formatDateShort(item.timestamp, i18n.language)}
+                          {item.event ? (
+                            <Link
+                              className={css({
+                                color: 'fg.muted',
+                                fontSize: 'xs',
+                                _hover: { color: 'fg.default', textDecoration: 'underline' }
+                              })}
+                              href={eventHref(item.event.id)}
+                            >
+                              {localizedTitle(item.event.nameJa, item.event.nameEn, i18n.language)}
+                            </Link>
+                          ) : (
+                            formatDateShort(item.timestamp, i18n.language)
+                          )}
                         </span>
                       </Stack>
                     </HStack>

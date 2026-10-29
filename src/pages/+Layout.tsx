@@ -17,7 +17,7 @@ import { useCountdownData } from '~/context/CountdownDataContext';
 import { unitIconUrl } from '~/utils/countdown/assets';
 import { ALL_UNITS, UNIT_META } from '~/utils/countdown/constants';
 import { charDisplayName } from '~/utils/countdown/format';
-import { characterHref, homeHref } from '~/utils/countdown/routes';
+import { characterHref, homeHref, unitHref } from '~/utils/countdown/routes';
 
 const NAV = [
   { path: '/', key: 'overview', exact: true },
@@ -189,9 +189,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {ALL_UNITS.map((unit) => {
               const meta = UNIT_META[unit];
               const members = snapshot.characters.filter((c) => c.unit === unit);
-              const hasActiveChar = members.some((ch) =>
-                currentPath.endsWith(`/characters/${ch.id}`)
-              );
+              const isUnitActive = currentPath.includes(`/units/${unit}`);
+              const hasActiveChar =
+                isUnitActive || members.some((ch) => currentPath.endsWith(`/characters/${ch.id}`));
 
               return (
                 <HStack
@@ -209,7 +209,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   px="2.5"
                   bg="bg.default/80"
                 >
-                  <HStack gap="1.5" minW="0">
+                  <Link
+                    className={css({
+                      display: 'flex',
+                      gap: '1.5',
+                      alignItems: 'center',
+                      rounded: 'md',
+                      minW: '0',
+                      py: '0.5',
+                      px: '1',
+                      transition: 'background 0.12s ease',
+                      _hover: { textDecoration: 'none', bg: 'bg.muted' }
+                    })}
+                    href={unitHref(unit)}
+                    title={`View ${meta.nameEn} all members dossier`}
+                  >
                     <img
                       src={unitIconUrl(unit)}
                       alt=""
@@ -220,32 +234,52 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     />
                     <Box
                       as="span"
-                      className={css({
-                        color: 'fg.muted',
-                        fontSize: 'xs',
-                        fontWeight: 'bold',
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap'
-                      })}
+                      className={
+                        hasActiveChar
+                          ? css({
+                              color: 'fg.default',
+                              fontSize: 'xs',
+                              fontWeight: 'bold',
+                              textOverflow: 'ellipsis',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap'
+                            })
+                          : css({
+                              color: 'fg.muted',
+                              fontSize: 'xs',
+                              fontWeight: 'bold',
+                              textOverflow: 'ellipsis',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap'
+                            })
+                      }
                       hideBelow="xl"
                     >
                       {i18n.language.startsWith('ja') ? meta.nameJa : meta.nameEn}
                     </Box>
                     <Box
                       as="span"
-                      className={css({
-                        color: 'fg.muted',
-                        fontSize: '2xs',
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap'
-                      })}
+                      className={
+                        hasActiveChar
+                          ? css({
+                              color: 'fg.default',
+                              fontSize: '2xs',
+                              fontWeight: 'bold',
+                              whiteSpace: 'nowrap'
+                            })
+                          : css({
+                              color: 'fg.muted',
+                              fontSize: '2xs',
+                              fontWeight: 'bold',
+                              whiteSpace: 'nowrap'
+                            })
+                      }
                       hideFrom="xl"
                       hideBelow="sm"
                     >
                       {meta.shortEn}
                     </Box>
-                  </HStack>
+                  </Link>
 
                   <HStack gap="1" flexShrink={0}>
                     {members.map((ch) => {

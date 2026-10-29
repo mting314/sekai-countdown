@@ -18,8 +18,10 @@ import {
   computeVirtualSingerMetrics
 } from './metrics';
 import {
+  cardHref,
   cardsHref,
   characterHref,
+  eventHref,
   extrasHref,
   focusHref,
   mixedAttrsHref,
@@ -519,11 +521,7 @@ export function buildGlobalSearchIndex(
         status,
         daysDelta,
         focusCharacter: focusChar,
-        href: focusChar
-          ? characterHref(focusChar.id)
-          : ev.isMixedEvent
-            ? mixedAttrsHref()
-            : focusHref()
+        href: eventHref(ev.id)
       };
     });
 
@@ -562,7 +560,7 @@ export function buildGlobalSearchIndex(
           character: ch,
           event: ev,
           daysAgo,
-          href: characterHref(ch.id)
+          href: cardHref(card.id)
         }
       ];
     });
