@@ -294,7 +294,7 @@ export function CardCutoutRender({
   if (!src) return null;
 
   const fadeMask =
-    'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.12) 14%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.9) 64%, rgba(0,0,0,1) 86%)';
+    'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.06) 14%, rgba(0,0,0,0.28) 30%, rgba(0,0,0,0.66) 50%, rgba(0,0,0,0.92) 70%, rgba(0,0,0,1) 88%)';
 
   return (
     <img

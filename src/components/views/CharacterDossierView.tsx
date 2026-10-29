@@ -85,12 +85,12 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
       <Box
         style={{
           borderColor: `${character.color}88`,
-          background: `radial-gradient(circle at 46% 50%, ${character.color}2e, transparent 62%)`
+          background: `radial-gradient(circle at 18% 50%, ${character.color}28, transparent 58%)`
         }}
         position="relative"
         rounded="2xl"
         borderWidth="1px"
-        minH={{ base: '200px', md: '235px' }}
+        minH={{ base: '205px', md: '240px' }}
         p={{ base: '4', md: '6' }}
         bg="bg.subtle"
         overflow="hidden"
@@ -100,12 +100,26 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
           top="0"
           right="0"
           bottom="0"
-          w={{ base: '82%', sm: '66%', md: '58%' }}
-          opacity={{ base: 0.42, sm: 0.96 }}
+          w={{ base: '100%', sm: '78%', md: '70%' }}
+          opacity={{ base: 0.45, sm: 0.98 }}
           pointerEvents="none"
         >
           <CardCutoutRender card={dossier.heroCard} preferTrained={preferTrained} />
         </Box>
+        <Box
+          className={css({
+            bgGradient: 'to-r',
+            gradientFrom: 'bg.subtle',
+            gradientVia: 'bg.subtle/75',
+            gradientTo: 'transparent'
+          })}
+          position="absolute"
+          top="0"
+          left="0"
+          bottom="0"
+          w={{ base: '82%', sm: '52%', md: '46%' }}
+          pointerEvents="none"
+        />
 
         <Stack position="relative" gap="3.5" maxW={{ base: '100%', sm: '65%' }}>
           <HStack gap="2" flexWrap="wrap">
