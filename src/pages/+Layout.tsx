@@ -7,6 +7,7 @@ import { Box, Container, HStack, Stack } from 'styled-system/jsx';
 import { ColorModeToggle } from '~/components/layout/ColorModeToggle';
 import { Footer } from '~/components/layout/Footer';
 import { LanguageToggle } from '~/components/layout/LanguageToggle';
+import { GlobalSearchDialog } from '~/components/search/GlobalSearchDialog';
 import { CharacterIcon } from '~/components/sekai/SekaiVisuals';
 import { Drawer } from '~/components/ui/drawer';
 import { Link } from '~/components/ui/link';
@@ -127,6 +128,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </HStack>
 
             <HStack gap="1.5" flexShrink={0} alignItems="center">
+              <GlobalSearchDialog />
+
               <Button
                 size="xs"
                 variant="outline"
@@ -134,7 +137,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 title={preferTrained ? t('header.trained_art') : t('header.untrained_art')}
               >
                 <BiStar />
-                <Box as="span" hideBelow="sm">
+                <Box as="span" hideBelow="xl">
                   {preferTrained ? t('header.trained_art') : t('header.untrained_art')}
                 </Box>
               </Button>
@@ -147,7 +150,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 title={t('header.sync_live')}
               >
                 <BiRefresh />
-                <Box as="span" hideBelow="md">
+                <Box as="span" hideBelow="2xl">
                   {syncStatus === 'syncing' || syncStatus === 'checking'
                     ? t('header.syncing')
                     : syncStatus === 'live'

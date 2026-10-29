@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-system/css';
 import { Box, Flex, Grid, HStack, Stack, Wrap } from 'styled-system/jsx';
+import { EmptyFilterState } from '~/components/search/InlineFilterInput';
 import {
   DroughtLeaderboardRow,
   DroughtMeter,
@@ -26,6 +27,13 @@ import { MAIN_UNITS, UNIT_META } from '~/utils/countdown/constants';
 import { charDisplayName, formatDateShort, SEVERITY_PALETTE } from '~/utils/countdown/format';
 import { computeFocusMetrics } from '~/utils/countdown/metrics';
 import { characterHref } from '~/utils/countdown/routes';
+import {
+  characterSearchHaystack,
+  matchesClockQuery,
+  matchesTokens,
+  normalizeSearchText,
+  tokenizeQuery
+} from '~/utils/countdown/search';
 
 export function FocusRotationView() {
   const { t, i18n } = useTranslation();
@@ -34,6 +42,7 @@ export function FocusRotationView() {
   const [unitFilter, setUnitFilter] = useState<SekaiUnitId | 'all'>('all');
   const [hakolimOnly, setHakolimOnly] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>('days');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const focus = useMemo(() => computeFocusMetrics(snapshot, now), [snapshot, now]);
 
@@ -42,16 +51,46 @@ export function FocusRotationView() {
     [focus, hakolimOnly]
   );
 
-  const visibleUnits = useMemo(
-    () => (unitFilter === 'all' ? MAIN_UNITS : MAIN_UNITS.filter((u) => u === unitFilter)),
-    [unitFilter]
-  );
+  const visibleUnits = useMemo(() => {
+    const base = unitFilter === 'all' ? MAIN_UNITS : MAIN_UNITS.filter((u) => u === unitFilter);
+    const tokens = tokenizeQuery(searchQuery);
+    if (tokens.length === 0) return base;
+    return base.filter((unit) => {
+      const rot = focus.rotationByUnit[unit];
+      const memberText = rot.rows
+        .map((r) => {
+          const evText = r.cells
+            .map((c) =>
+              c.event ? `${c.event.nickname ?? ''} ${c.event.nameEn ?? ''} ${c.event.nameJa}` : ''
+            )
+            .join(' ');
+          return `${characterSearchHaystack(r.character)} ${evText}`;
+        })
+        .join(' ');
+      return matchesTokens(normalizeSearchText(memberText), tokens);
+    });
+  }, [unitFilter, searchQuery, focus]);
 
   const leaderboardClocks = useMemo(() => {
     const base = hakolimOnly ? focus.characterHakolim : focus.characterFocus;
     const filtered = unitFilter === 'all' ? base : base.filter((c) => c.unitId === unitFilter);
-    return sortClocks(filtered, sortMode);
-  }, [focus, hakolimOnly, unitFilter, sortMode]);
+    const searched = searchQuery.trim()
+      ? filtered.filter((c) =>
+          matchesClockQuery(searchQuery, c, { charById, cardById, eventById, musicById })
+        )
+      : filtered;
+    return sortClocks(searched, sortMode);
+  }, [
+    focus,
+    hakolimOnly,
+    unitFilter,
+    sortMode,
+    searchQuery,
+    charById,
+    cardById,
+    eventById,
+    musicById
+  ]);
 
   return (
     <Stack gap="7">
@@ -162,6 +201,8 @@ export function FocusRotationView() {
         includeVirtualSingers={false}
         sortMode={sortMode}
         onSortModeChange={setSortMode}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
         extraControls={
           <HStack gap="1">
             <Button
@@ -531,27 +572,31 @@ export function FocusRotationView() {
         <Text as="h2" fontSize="lg" fontWeight="bold">
           {t('focus.leaderboard_title')}
         </Text>
-        <Stack gap="2.5">
-          {leaderboardClocks.map((clock, idx) => {
-            const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
-            if (!ch) return null;
-            const ev = clock.latest?.eventId ? eventById.get(clock.latest.eventId) : undefined;
-            const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
-            const song = clock.latest?.musicId ? musicById.get(clock.latest.musicId) : undefined;
-            return (
-              <DroughtLeaderboardRow
-                key={ch.id}
-                rank={idx + 1}
-                character={ch}
-                clock={clock}
-                card={card}
-                event={ev}
-                music={song}
-                preferTrained={preferTrained}
-              />
-            );
-          })}
-        </Stack>
+        {leaderboardClocks.length === 0 ? (
+          <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+        ) : (
+          <Stack gap="2.5">
+            {leaderboardClocks.map((clock, idx) => {
+              const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
+              if (!ch) return null;
+              const ev = clock.latest?.eventId ? eventById.get(clock.latest.eventId) : undefined;
+              const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
+              const song = clock.latest?.musicId ? musicById.get(clock.latest.musicId) : undefined;
+              return (
+                <DroughtLeaderboardRow
+                  key={ch.id}
+                  rank={idx + 1}
+                  character={ch}
+                  clock={clock}
+                  card={card}
+                  event={ev}
+                  music={song}
+                  preferTrained={preferTrained}
+                />
+              );
+            })}
+          </Stack>
+        )}
       </Stack>
     </Stack>
   );

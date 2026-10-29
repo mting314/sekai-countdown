@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-system/css';
 import { Box, Flex, HStack, Stack, Wrap } from 'styled-system/jsx';
+import { EmptyFilterState, InlineFilterInput } from '~/components/search/InlineFilterInput';
 import {
   DroughtLeaderboardRow,
   sortClocks,
@@ -16,6 +17,7 @@ import { MAIN_UNITS } from '~/utils/countdown/constants';
 import { charDisplayName, formatDateShort, SEVERITY_PALETTE } from '~/utils/countdown/format';
 import { computeVirtualSingerMetrics } from '~/utils/countdown/metrics';
 import { characterHref } from '~/utils/countdown/routes';
+import { matchesClockQuery } from '~/utils/countdown/search';
 
 type VsFocusMode = '4star' | 'any_card' | 'song';
 
@@ -26,6 +28,12 @@ export function VirtualSingerView() {
   const [slotMode, setSlotMode] = useState<VsFocusMode>('4star');
   const [matrixOnly4Star, setMatrixOnly4Star] = useState(true);
   const [sortMode, setSortMode] = useState<SortMode>('days');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const lookups = useMemo(
+    () => ({ charById, cardById, eventById, musicById }),
+    [charById, cardById, eventById, musicById]
+  );
 
   const vs = useMemo(() => computeVirtualSingerMetrics(snapshot, now), [snapshot, now]);
 
@@ -36,10 +44,27 @@ export function VirtualSingerView() {
         : slotMode === 'any_card'
           ? vs.unitFocusVsAnyCard
           : vs.unitFocusVsSong;
-    return sortClocks(raw, sortMode);
-  }, [vs, slotMode, sortMode]);
+    const filtered = raw.filter((c) => matchesClockQuery(searchQuery, c, lookups));
+    return sortClocks(filtered, sortMode);
+  }, [vs, slotMode, sortMode, searchQuery, lookups]);
 
-  const bannerClocks = useMemo(() => sortClocks(vs.vsBannerFocus, 'days'), [vs]);
+  const filteredMatrixRows = useMemo(() => {
+    if (!searchQuery.trim()) return vs.subUnitMatrix;
+    return vs.subUnitMatrix.filter((row) =>
+      row.some((cell) =>
+        matchesClockQuery(
+          searchQuery,
+          matrixOnly4Star ? cell.clock4Star : cell.clockAnyCard,
+          lookups
+        )
+      )
+    );
+  }, [vs.subUnitMatrix, searchQuery, matrixOnly4Star, lookups]);
+
+  const bannerClocks = useMemo(() => {
+    const filtered = vs.vsBannerFocus.filter((c) => matchesClockQuery(searchQuery, c, lookups));
+    return sortClocks(filtered, 'days');
+  }, [vs, searchQuery, lookups]);
 
   return (
     <Stack gap="7">
@@ -84,42 +109,49 @@ export function VirtualSingerView() {
             </Button>
           </Wrap>
 
-          <HStack gap="1">
-            {(['days', 'overdue', 'character'] as SortMode[]).map((m) => (
-              <Button
-                key={m}
-                size="xs"
-                variant={sortMode === m ? 'solid' : 'subtle'}
-                onClick={() => setSortMode(m)}
-              >
-                {t(`common.sort_${m}`)}
-              </Button>
-            ))}
-          </HStack>
+          <Wrap gap="2" alignItems="center">
+            <InlineFilterInput value={searchQuery} onChange={setSearchQuery} maxW="250px" />
+            <HStack gap="1">
+              {(['days', 'overdue', 'character'] as SortMode[]).map((m) => (
+                <Button
+                  key={m}
+                  size="xs"
+                  variant={sortMode === m ? 'solid' : 'subtle'}
+                  onClick={() => setSortMode(m)}
+                >
+                  {t(`common.sort_${m}`)}
+                </Button>
+              ))}
+            </HStack>
+          </Wrap>
         </Flex>
 
-        <Stack gap="2.5">
-          {slotClocks.map((clock, idx) => {
-            const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
-            if (!ch) return null;
-            const ev = clock.latest?.eventId ? eventById.get(clock.latest.eventId) : undefined;
-            const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
-            const song = clock.latest?.musicId ? musicById.get(clock.latest.musicId) : undefined;
-            return (
-              <DroughtLeaderboardRow
-                key={ch.id}
-                rank={idx + 1}
-                character={ch}
-                clock={clock}
-                card={card}
-                event={ev}
-                music={song}
-                preferTrained={preferTrained}
-                extraBadge={ev ? <UnitBadge unit={ev.unit} short size="xs" /> : undefined}
-              />
-            );
-          })}
-        </Stack>
+        {slotClocks.length === 0 ? (
+          <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+        ) : (
+          <Stack gap="2.5">
+            {slotClocks.map((clock, idx) => {
+              const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
+              if (!ch) return null;
+              const ev = clock.latest?.eventId ? eventById.get(clock.latest.eventId) : undefined;
+              const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
+              const song = clock.latest?.musicId ? musicById.get(clock.latest.musicId) : undefined;
+              return (
+                <DroughtLeaderboardRow
+                  key={ch.id}
+                  rank={idx + 1}
+                  character={ch}
+                  clock={clock}
+                  card={card}
+                  event={ev}
+                  music={song}
+                  preferTrained={preferTrained}
+                  extraBadge={ev ? <UnitBadge unit={ev.unit} short size="xs" /> : undefined}
+                />
+              );
+            })}
+          </Stack>
+        )}
       </Stack>
 
       {/* 2. 6 x 5 SEKAI Sub-Unit Matrix */}
@@ -157,131 +189,135 @@ export function VirtualSingerView() {
           </HStack>
         </Flex>
 
-        <Box
-          borderColor="border.default"
-          rounded="2xl"
-          borderWidth="1px"
-          p="3"
-          bg="bg.subtle"
-          overflowX="auto"
-        >
-          <table
-            className={css({
-              w: 'full',
-              borderCollapse: 'separate',
-              borderSpacing: '6px'
-            })}
+        {filteredMatrixRows.length === 0 ? (
+          <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+        ) : (
+          <Box
+            borderColor="border.default"
+            rounded="2xl"
+            borderWidth="1px"
+            p="3"
+            bg="bg.subtle"
+            overflowX="auto"
           >
-            <thead>
-              <tr>
-                <th
-                  className={css({
-                    minW: '125px',
-                    color: 'fg.muted',
-                    fontSize: 'xs',
-                    textAlign: 'left'
-                  })}
-                >
-                  Virtual Singer
-                </th>
-                {MAIN_UNITS.map((unit) => (
-                  <th key={unit} className={css({ minW: '132px', textAlign: 'center' })}>
-                    <UnitBadge unit={unit} short />
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {vs.subUnitMatrix.map((row) => {
-                const vsId = row[0].vsCharacterId;
-                const vsChar = charById.get(vsId);
-                if (!vsChar) return null;
-                return (
-                  <tr key={vsId}>
-                    <td className={css({ verticalAlign: 'middle' })}>
-                      <Link
-                        className={css({
-                          display: 'flex',
-                          gap: '2',
-                          alignItems: 'center',
-                          _hover: { textDecoration: 'none', opacity: 0.85 }
-                        })}
-                        href={characterHref(vsId)}
-                      >
-                        <CharacterIcon characterId={vsId} size={34} />
-                        <span className={css({ fontSize: 'xs', fontWeight: 'bold' })}>
-                          {charDisplayName(vsChar, i18n.language, true)}
-                        </span>
-                      </Link>
-                    </td>
-
-                    {row.map((cell) => {
-                      const clock = matrixOnly4Star ? cell.clock4Star : cell.clockAnyCard;
-                      const pal = SEVERITY_PALETTE[clock.severity];
-                      const latestCard = clock.latest?.cardId
-                        ? cardById.get(clock.latest.cardId)
-                        : undefined;
-
-                      return (
-                        <td key={cell.supportUnit}>
-                          <Box
-                            style={{
-                              borderColor:
-                                clock.severity === 'record' || clock.severity === 'overdue'
-                                  ? pal.border
-                                  : undefined,
-                              background: clock.severity === 'record' ? pal.bg : undefined
-                            }}
-                            rounded="xl"
-                            borderWidth="1px"
-                            p="2.5"
-                            bg="bg.default"
-                          >
-                            <HStack gap="2" alignItems="center">
-                              {latestCard ? (
-                                <CardThumbTile
-                                  card={latestCard}
-                                  preferTrained={preferTrained}
-                                  size={44}
-                                  showSupply={false}
-                                />
-                              ) : (
-                                <CharacterIcon
-                                  characterId={vsId}
-                                  subUnit={cell.supportUnit}
-                                  size={38}
-                                />
-                              )}
-
-                              <Stack gap="0" minW="0">
-                                <span
-                                  className={css({
-                                    fontSize: 'md',
-                                    fontWeight: 'black',
-                                    fontVariantNumeric: 'tabular-nums',
-                                    lineHeight: '1.1'
-                                  })}
-                                  style={{ color: pal.text }}
-                                >
-                                  {t('common.days', { count: clock.daysSince })}
-                                </span>
-                                <span className={css({ color: 'fg.muted', fontSize: '10px' })}>
-                                  {clock.count > 0
-                                    ? `${formatDateShort(clock.lastTimestamp, i18n.language)} (${clock.count})`
-                                    : t('common.never')}
-                                </span>
-                              </Stack>
-                            </HStack>
-                          </Box>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
+            <table
+              className={css({
+                w: 'full',
+                borderCollapse: 'separate',
+                borderSpacing: '6px'
               })}
-            </tbody>
-          </table>
-        </Box>
+            >
+              <thead>
+                <tr>
+                  <th
+                    className={css({
+                      minW: '125px',
+                      color: 'fg.muted',
+                      fontSize: 'xs',
+                      textAlign: 'left'
+                    })}
+                  >
+                    Virtual Singer
+                  </th>
+                  {MAIN_UNITS.map((unit) => (
+                    <th key={unit} className={css({ minW: '132px', textAlign: 'center' })}>
+                      <UnitBadge unit={unit} short />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredMatrixRows.map((row) => {
+                  const vsId = row[0].vsCharacterId;
+                  const vsChar = charById.get(vsId);
+                  if (!vsChar) return null;
+                  return (
+                    <tr key={vsId}>
+                      <td className={css({ verticalAlign: 'middle' })}>
+                        <Link
+                          className={css({
+                            display: 'flex',
+                            gap: '2',
+                            alignItems: 'center',
+                            _hover: { textDecoration: 'none', opacity: 0.85 }
+                          })}
+                          href={characterHref(vsId)}
+                        >
+                          <CharacterIcon characterId={vsId} size={34} />
+                          <span className={css({ fontSize: 'xs', fontWeight: 'bold' })}>
+                            {charDisplayName(vsChar, i18n.language, true)}
+                          </span>
+                        </Link>
+                      </td>
+
+                      {row.map((cell) => {
+                        const clock = matrixOnly4Star ? cell.clock4Star : cell.clockAnyCard;
+                        const pal = SEVERITY_PALETTE[clock.severity];
+                        const latestCard = clock.latest?.cardId
+                          ? cardById.get(clock.latest.cardId)
+                          : undefined;
+
+                        return (
+                          <td key={cell.supportUnit}>
+                            <Box
+                              style={{
+                                borderColor:
+                                  clock.severity === 'record' || clock.severity === 'overdue'
+                                    ? pal.border
+                                    : undefined,
+                                background: clock.severity === 'record' ? pal.bg : undefined
+                              }}
+                              rounded="xl"
+                              borderWidth="1px"
+                              p="2.5"
+                              bg="bg.default"
+                            >
+                              <HStack gap="2" alignItems="center">
+                                {latestCard ? (
+                                  <CardThumbTile
+                                    card={latestCard}
+                                    preferTrained={preferTrained}
+                                    size={44}
+                                    showSupply={false}
+                                  />
+                                ) : (
+                                  <CharacterIcon
+                                    characterId={vsId}
+                                    subUnit={cell.supportUnit}
+                                    size={38}
+                                  />
+                                )}
+
+                                <Stack gap="0" minW="0">
+                                  <span
+                                    className={css({
+                                      fontSize: 'md',
+                                      fontWeight: 'black',
+                                      fontVariantNumeric: 'tabular-nums',
+                                      lineHeight: '1.1'
+                                    })}
+                                    style={{ color: pal.text }}
+                                  >
+                                    {t('common.days', { count: clock.daysSince })}
+                                  </span>
+                                  <span className={css({ color: 'fg.muted', fontSize: '10px' })}>
+                                    {clock.count > 0
+                                      ? `${formatDateShort(clock.lastTimestamp, i18n.language)} (${clock.count})`
+                                      : t('common.never')}
+                                  </span>
+                                </Stack>
+                              </HStack>
+                            </Box>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </Box>
+        )}
       </Stack>
 
       {/* 3. Dedicated Virtual Singer Banner Events */}
@@ -289,25 +325,29 @@ export function VirtualSingerView() {
         <Text as="h2" fontSize="xl" fontWeight="extrabold">
           {t('vs.vs_banner_title')}
         </Text>
-        <Stack gap="2.5">
-          {bannerClocks.map((clock, idx) => {
-            const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
-            if (!ch) return null;
-            const ev = clock.latest?.eventId ? eventById.get(clock.latest.eventId) : undefined;
-            const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
-            return (
-              <DroughtLeaderboardRow
-                key={ch.id}
-                rank={idx + 1}
-                character={ch}
-                clock={clock}
-                card={card}
-                event={ev}
-                preferTrained={preferTrained}
-              />
-            );
-          })}
-        </Stack>
+        {bannerClocks.length === 0 ? (
+          <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+        ) : (
+          <Stack gap="2.5">
+            {bannerClocks.map((clock, idx) => {
+              const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
+              if (!ch) return null;
+              const ev = clock.latest?.eventId ? eventById.get(clock.latest.eventId) : undefined;
+              const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
+              return (
+                <DroughtLeaderboardRow
+                  key={ch.id}
+                  rank={idx + 1}
+                  character={ch}
+                  clock={clock}
+                  card={card}
+                  event={ev}
+                  preferTrained={preferTrained}
+                />
+              );
+            })}
+          </Stack>
+        )}
       </Stack>
     </Stack>
   );

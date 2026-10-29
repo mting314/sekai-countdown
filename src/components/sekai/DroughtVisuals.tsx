@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-system/css';
 import { Box, Flex, HStack, Stack, Wrap } from 'styled-system/jsx';
+import { InlineFilterInput } from '~/components/search/InlineFilterInput';
 import { Link } from '~/components/ui/link';
 import { Button } from '~/components/ui/styled/button';
 import { Text } from '~/components/ui/text';
@@ -403,6 +404,9 @@ export function FilterAndSortBar({
   includeVirtualSingers = true,
   sortMode,
   onSortModeChange,
+  searchQuery,
+  onSearchQueryChange,
+  searchPlaceholder,
   extraControls
 }: {
   unitFilter: SekaiUnitId | 'all';
@@ -410,6 +414,9 @@ export function FilterAndSortBar({
   includeVirtualSingers?: boolean;
   sortMode?: SortMode;
   onSortModeChange?: (next: SortMode) => void;
+  searchQuery?: string;
+  onSearchQueryChange?: (next: string) => void;
+  searchPlaceholder?: string;
   extraControls?: React.ReactNode;
 }) {
   const { t } = useTranslation();
@@ -456,6 +463,14 @@ export function FilterAndSortBar({
       </Wrap>
 
       <Wrap gap="2" alignItems="center">
+        {searchQuery !== undefined && onSearchQueryChange && (
+          <InlineFilterInput
+            value={searchQuery}
+            onChange={onSearchQueryChange}
+            placeholder={searchPlaceholder}
+            maxW="250px"
+          />
+        )}
         {extraControls}
         {sortMode && onSortModeChange && (
           <HStack gap="1">

@@ -144,6 +144,46 @@ async function runDesktop(baseUrl: string, browser: Browser) {
   await page.screenshot({ path: `${OUT}/desktop-01-overview-hero.png`, fullPage: false });
   await page.screenshot({ path: `${OUT}/desktop-01-overview-full.png`, fullPage: true });
 
+  // 1b. Inline Filter Input + Global Omni-Search (Ctrl+K)
+  const inlineSearch = page.locator('input[type="search"]').first();
+  await inlineSearch.fill('mizuki');
+  await page.waitForTimeout(150);
+  const filteredCards = await page.locator(`a[href*="/characters/"]`).count();
+  check(
+    'Desktop /: inline search filters All-Character Snapshot Grid down',
+    filteredCards < quickCards && filteredCards >= 2,
+    { before: quickCards, after: filteredCards }
+  );
+  await inlineSearch.fill('');
+  await page.waitForTimeout(100);
+
+  await page.keyboard.press('Control+k');
+  const dialog = page.getByRole('dialog');
+  await dialog.waitFor({ state: 'visible', timeout: 5000 });
+  const dialogInput = dialog.locator('input[type="text"]');
+  await dialogInput.fill('mizu5');
+  await page.waitForTimeout(150);
+  const mizu5Text = await dialog.innerText();
+  check(
+    'Desktop Ctrl+K: exact nickname query "mizu5" surfaces Event #145',
+    mizu5Text.includes('#145') && mizu5Text.includes('mizu5')
+  );
+
+  await dialogInput.fill('mizuki');
+  await page.waitForTimeout(250);
+  await waitImagesSettled(page);
+  const mizuOmniLower = (await dialog.innerText()).toLowerCase();
+  check(
+    'Desktop Ctrl+K: omni-search "mizuki" returns Characters, Clocks, Events & Cards',
+    mizuOmniLower.includes('characters') &&
+      mizuOmniLower.includes('countdown clocks') &&
+      mizuOmniLower.includes('hakolim') &&
+      mizuOmniLower.includes('events')
+  );
+  await page.screenshot({ path: `${OUT}/desktop-09-global-search.png`, fullPage: false });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+
   // 2. Focus & Rotations
   await page.goto(`${baseUrl}/focus`, { waitUntil: 'networkidle' });
   await waitImagesSettled(page);
@@ -334,8 +374,16 @@ async function runMobile(baseUrl: string, browser: Browser) {
     }
   }
 
-  // Open mobile navigation drawer
+  // Open mobile search dialog + navigation drawer
   await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
+  const mobileSearchBtn = page.getByRole('button', { name: 'Search' });
+  check('Mobile /: header Search button visible', await mobileSearchBtn.isVisible());
+  await mobileSearchBtn.click();
+  await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 5000 });
+  await checkNoHorizontalOverflow(page, 'Mobile / (Search dialog open)');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+
   const menuBtn = page.getByRole('button', { name: 'Open Menu' });
   check('Mobile /: hamburger menu button visible', await menuBtn.isVisible());
   await menuBtn.click();

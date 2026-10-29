@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-system/css';
 import { Box, Flex, Grid, HStack, Stack, Wrap } from 'styled-system/jsx';
+import { EmptyFilterState, InlineFilterInput } from '~/components/search/InlineFilterInput';
 import { DroughtMeter, SeverityPill } from '~/components/sekai/DroughtVisuals';
 import {
   AttributeIcon,
@@ -16,7 +17,7 @@ import { Link } from '~/components/ui/link';
 import { Text } from '~/components/ui/text';
 import { useCountdownData } from '~/context/CountdownDataContext';
 import { cardArtUrl } from '~/utils/countdown/assets';
-import { ATTRIBUTE_META } from '~/utils/countdown/constants';
+import { ATTRIBUTE_META, SUPPLY_BADGE_META } from '~/utils/countdown/constants';
 import {
   charDisplayName,
   formatDateShort,
@@ -25,15 +26,45 @@ import {
 } from '~/utils/countdown/format';
 import { computeCharacterDossier } from '~/utils/countdown/metrics';
 import { characterHref, homeHref } from '~/utils/countdown/routes';
+import { matchesTokens, normalizeSearchText, tokenizeQuery } from '~/utils/countdown/search';
 
 export function CharacterDossierView({ characterId }: { characterId: number }) {
   const { t, i18n } = useTranslation();
   const { snapshot, now, preferTrained, cardById, musicById, stampById } = useCountdownData();
+  const [timelineQuery, setTimelineQuery] = useState('');
 
   const dossier = useMemo(
     () => computeCharacterDossier(snapshot, characterId, now),
     [snapshot, characterId, now]
   );
+
+  const filteredTimeline = useMemo(() => {
+    if (!dossier) return [];
+    const tokens = tokenizeQuery(timelineQuery);
+    if (tokens.length === 0) return dossier.timeline;
+    return dossier.timeline.filter((item) => {
+      const card = item.card;
+      if (!card) return false;
+      const aMeta = ATTRIBUTE_META[card.attr];
+      const sMeta = SUPPLY_BADGE_META[card.supply];
+      const hay = normalizeSearchText(
+        [
+          card.prefixEn ?? '',
+          card.prefixJa,
+          card.attr,
+          aMeta.labelEn,
+          aMeta.labelJa,
+          card.supply,
+          sMeta.shortEn,
+          sMeta.shortJa,
+          item.event?.nickname ?? '',
+          item.event?.nameEn ?? '',
+          item.event?.nameJa ?? ''
+        ].join(' ')
+      );
+      return matchesTokens(hay, tokens);
+    });
+  }, [dossier, timelineQuery]);
 
   if (!dossier) {
     return (
@@ -362,110 +393,132 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
 
       {/* 4. Chronological 4★ Release & Gap Timeline */}
       <Stack gap="3">
-        <Text as="h2" fontSize="xl" fontWeight="extrabold">
-          {t('dossier.timeline_title')} ({dossier.timeline.length})
-        </Text>
-        <Stack gap="2">
-          {dossier.timeline.map((item) => {
-            const card = item.card!;
-            const art = cardArtUrl(card, preferTrained);
-            return (
-              <Box
-                key={card.id}
-                position="relative"
-                borderColor="border.subtle"
-                rounded="xl"
-                borderWidth="1px"
-                p="3"
-                bg="bg.subtle"
-                overflow="hidden"
-              >
-                {art && (
-                  <img
-                    src={art}
-                    alt=""
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    className={css({
-                      position: 'absolute',
-                      top: '0',
-                      right: '0',
-                      objectFit: 'cover',
-                      w: '38%',
-                      h: 'full',
-                      opacity: 0.2,
-                      pointerEvents: 'none'
-                    })}
-                  />
-                )}
-                <Flex
-                  position="relative"
-                  gap="3"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  flexWrap="wrap"
-                >
-                  <HStack gap="3">
-                    <CardThumbTile card={card} preferTrained={preferTrained} size={50} />
-                    <Stack gap="0.5">
-                      <HStack gap="1.5" flexWrap="wrap">
-                        {item.event?.nickname && (
-                          <span
-                            className={css({
-                              rounded: 'sm',
-                              py: '0.5',
-                              px: '1.5',
-                              fontSize: '2xs',
-                              fontWeight: 'bold',
-                              bg: 'bg.muted'
-                            })}
-                          >
-                            {item.event.nickname}
-                          </span>
-                        )}
-                        <span className={css({ fontSize: 'sm', fontWeight: 'bold' })}>
-                          {localizedTitle(card.prefixJa, card.prefixEn, i18n.language)}
-                        </span>
-                      </HStack>
-                      <span className={css({ color: 'fg.muted', fontSize: 'xs' })}>
-                        {item.event
-                          ? localizedTitle(item.event.nameJa, item.event.nameEn, i18n.language)
-                          : formatDateShort(item.timestamp, i18n.language)}
-                      </span>
-                    </Stack>
-                  </HStack>
+        <Flex
+          gap="2"
+          direction={{ base: 'column', sm: 'row' }}
+          justifyContent="space-between"
+          alignItems={{ base: 'flex-start', sm: 'center' }}
+        >
+          <Text as="h2" fontSize="xl" fontWeight="extrabold">
+            {t('dossier.timeline_title')} (
+            {timelineQuery.trim()
+              ? `${filteredTimeline.length}/${dossier.timeline.length}`
+              : dossier.timeline.length}
+            )
+          </Text>
+          <InlineFilterInput
+            value={timelineQuery}
+            onChange={setTimelineQuery}
+            placeholder={t('search.dossier_placeholder')}
+            maxW="320px"
+          />
+        </Flex>
 
-                  <HStack gap="2.5">
-                    {item.gapDays !== undefined && (
+        {filteredTimeline.length === 0 ? (
+          <EmptyFilterState query={timelineQuery} onClear={() => setTimelineQuery('')} />
+        ) : (
+          <Stack gap="2">
+            {filteredTimeline.map((item) => {
+              const card = item.card!;
+              const art = cardArtUrl(card, preferTrained);
+              return (
+                <Box
+                  key={card.id}
+                  position="relative"
+                  borderColor="border.subtle"
+                  rounded="xl"
+                  borderWidth="1px"
+                  p="3"
+                  bg="bg.subtle"
+                  overflow="hidden"
+                >
+                  {art && (
+                    <img
+                      src={art}
+                      alt=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      className={css({
+                        position: 'absolute',
+                        top: '0',
+                        right: '0',
+                        objectFit: 'cover',
+                        w: '38%',
+                        h: 'full',
+                        opacity: 0.2,
+                        pointerEvents: 'none'
+                      })}
+                    />
+                  )}
+                  <Flex
+                    position="relative"
+                    gap="3"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    flexWrap="wrap"
+                  >
+                    <HStack gap="3">
+                      <CardThumbTile card={card} preferTrained={preferTrained} size={50} />
+                      <Stack gap="0.5">
+                        <HStack gap="1.5" flexWrap="wrap">
+                          {item.event?.nickname && (
+                            <span
+                              className={css({
+                                rounded: 'sm',
+                                py: '0.5',
+                                px: '1.5',
+                                fontSize: '2xs',
+                                fontWeight: 'bold',
+                                bg: 'bg.muted'
+                              })}
+                            >
+                              {item.event.nickname}
+                            </span>
+                          )}
+                          <span className={css({ fontSize: 'sm', fontWeight: 'bold' })}>
+                            {localizedTitle(card.prefixJa, card.prefixEn, i18n.language)}
+                          </span>
+                        </HStack>
+                        <span className={css({ color: 'fg.muted', fontSize: 'xs' })}>
+                          {item.event
+                            ? localizedTitle(item.event.nameJa, item.event.nameEn, i18n.language)
+                            : formatDateShort(item.timestamp, i18n.language)}
+                        </span>
+                      </Stack>
+                    </HStack>
+
+                    <HStack gap="2.5">
+                      {item.gapDays !== undefined && (
+                        <span
+                          className={css({
+                            rounded: 'full',
+                            py: '0.5',
+                            px: '2',
+                            fontSize: 'xs',
+                            fontWeight: 'bold',
+                            fontVariantNumeric: 'tabular-nums',
+                            bg: 'bg.default'
+                          })}
+                        >
+                          +{item.gapDays}d gap
+                        </span>
+                      )}
                       <span
                         className={css({
-                          rounded: 'full',
-                          py: '0.5',
-                          px: '2',
+                          color: 'fg.muted',
                           fontSize: 'xs',
-                          fontWeight: 'bold',
-                          fontVariantNumeric: 'tabular-nums',
-                          bg: 'bg.default'
+                          fontVariantNumeric: 'tabular-nums'
                         })}
                       >
-                        +{item.gapDays}d gap
+                        {formatDateShort(item.timestamp, i18n.language)}
                       </span>
-                    )}
-                    <span
-                      className={css({
-                        color: 'fg.muted',
-                        fontSize: 'xs',
-                        fontVariantNumeric: 'tabular-nums'
-                      })}
-                    >
-                      {formatDateShort(item.timestamp, i18n.language)}
-                    </span>
-                  </HStack>
-                </Flex>
-              </Box>
-            );
-          })}
-        </Stack>
+                    </HStack>
+                  </Flex>
+                </Box>
+              );
+            })}
+          </Stack>
+        )}
       </Stack>
     </Stack>
   );

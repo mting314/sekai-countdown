@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-system/css';
 import { Box, Grid, HStack, Stack, Wrap } from 'styled-system/jsx';
+import { EmptyFilterState } from '~/components/search/InlineFilterInput';
 import {
   DroughtLeaderboardRow,
   FilterAndSortBar,
@@ -17,17 +18,20 @@ import type { SekaiUnitId } from '~/types/countdown';
 import { charDisplayName } from '~/utils/countdown/format';
 import { computeCardMetrics } from '~/utils/countdown/metrics';
 import { characterHref } from '~/utils/countdown/routes';
+import { matchesClockQuery } from '~/utils/countdown/search';
 
 type CardSubTab = 'lim4' | 'any4' | 'fes' | 'perm4' | 'event3' | 'event2';
 
 export function CardDroughtView() {
   const { t, i18n } = useTranslation();
-  const { snapshot, now, preferTrained, charById, cardById, eventById } = useCountdownData();
+  const { snapshot, now, preferTrained, charById, cardById, eventById, musicById } =
+    useCountdownData();
   const [subTab, setSubTab] = useState<CardSubTab>('lim4');
   const [includeWorldLink, setIncludeWorldLink] = useState(false);
   const [includeCollab, setIncludeCollab] = useState(true);
   const [unitFilter, setUnitFilter] = useState<SekaiUnitId | 'all'>('all');
   const [sortMode, setSortMode] = useState<SortMode>('days');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const cardMetrics = useMemo(
     () => computeCardMetrics(snapshot, now, { includeWorldLink, includeCollab }),
@@ -54,8 +58,23 @@ export function CardDroughtView() {
                 : cardMetrics.event2Star;
 
     const filtered = unitFilter === 'all' ? raw : raw.filter((c) => c.unitId === unitFilter);
-    return sortClocks(filtered, sortMode);
-  }, [subTab, cardMetrics, unitFilter, sortMode]);
+    const searched = searchQuery.trim()
+      ? filtered.filter((c) =>
+          matchesClockQuery(searchQuery, c, { charById, cardById, eventById, musicById })
+        )
+      : filtered;
+    return sortClocks(searched, sortMode);
+  }, [
+    subTab,
+    cardMetrics,
+    unitFilter,
+    sortMode,
+    searchQuery,
+    charById,
+    cardById,
+    eventById,
+    musicById
+  ]);
 
   return (
     <Stack gap="6">
@@ -211,59 +230,65 @@ export function CardDroughtView() {
         onUnitFilterChange={setUnitFilter}
         sortMode={sortMode}
         onSortModeChange={setSortMode}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
       />
 
-      <Stack gap="2.5">
-        {activeClocks.map((clock, idx) => {
-          const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
-          if (!ch) return null;
-          const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
-          const ev = clock.latest?.eventId ? eventById.get(clock.latest.eventId) : undefined;
-          const fes = subTab === 'fes' ? fesByChar.get(ch.id) : undefined;
+      {activeClocks.length === 0 ? (
+        <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+      ) : (
+        <Stack gap="2.5">
+          {activeClocks.map((clock, idx) => {
+            const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
+            if (!ch) return null;
+            const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
+            const ev = clock.latest?.eventId ? eventById.get(clock.latest.eventId) : undefined;
+            const fes = subTab === 'fes' ? fesByChar.get(ch.id) : undefined;
 
-          return (
-            <DroughtLeaderboardRow
-              key={ch.id}
-              rank={idx + 1}
-              character={ch}
-              clock={clock}
-              card={card}
-              event={ev}
-              preferTrained={preferTrained}
-              extraBadge={
-                fes ? (
-                  <HStack gap="1">
-                    <span
-                      className={css({
-                        rounded: 'sm',
-                        py: '0.5',
-                        px: '1.5',
-                        fontSize: '2xs',
-                        fontWeight: 'bold'
-                      })}
-                      style={{ background: '#8b5cf626', color: '#8b5cf6' }}
-                    >
-                      ColorFes ×{fes.colorFesCount}
-                    </span>
-                    <span
-                      className={css({
-                        rounded: 'sm',
-                        py: '0.5',
-                        px: '1.5',
-                        fontSize: '2xs',
-                        fontWeight: 'bold'
-                      })}
-                      style={{ background: '#06b6d426', color: '#06b6d4' }}
-                    >
-                      BloomFes ×{fes.bloomFesCount}
-                    </span>
-                  </HStack>
-                ) : undefined
-              }
-            />
-          );
-        })}
-      </Stack>
+            return (
+              <DroughtLeaderboardRow
+                key={ch.id}
+                rank={idx + 1}
+                character={ch}
+                clock={clock}
+                card={card}
+                event={ev}
+                preferTrained={preferTrained}
+                extraBadge={
+                  fes ? (
+                    <HStack gap="1">
+                      <span
+                        className={css({
+                          rounded: 'sm',
+                          py: '0.5',
+                          px: '1.5',
+                          fontSize: '2xs',
+                          fontWeight: 'bold'
+                        })}
+                        style={{ background: '#8b5cf626', color: '#8b5cf6' }}
+                      >
+                        ColorFes ×{fes.colorFesCount}
+                      </span>
+                      <span
+                        className={css({
+                          rounded: 'sm',
+                          py: '0.5',
+                          px: '1.5',
+                          fontSize: '2xs',
+                          fontWeight: 'bold'
+                        })}
+                        style={{ background: '#06b6d426', color: '#06b6d4' }}
+                      >
+                        BloomFes ×{fes.bloomFesCount}
+                      </span>
+                    </HStack>
+                  ) : undefined
+                }
+              />
+            );
+          })}
+        </Stack>
+      )}
     </Stack>
   );
 }

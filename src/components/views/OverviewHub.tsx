@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-system/css';
 import { Box, Flex, Grid, HStack, Stack, Wrap } from 'styled-system/jsx';
+import { EmptyFilterState, InlineFilterInput } from '~/components/search/InlineFilterInput';
 import {
   DroughtMeter,
   SeverityPill,
@@ -46,6 +47,7 @@ import {
   mixedAttrsHref,
   virtualSingersHref
 } from '~/utils/countdown/routes';
+import { matchesClockQuery } from '~/utils/countdown/search';
 
 type QuickMetricKey = 'focus' | 'lim4' | 'any4' | 'perm4' | 'mixed_banner' | 'alt_vocal' | 'stamp';
 
@@ -464,10 +466,11 @@ function PodiumCategoryCard({
 
 export function OverviewHub() {
   const { t, i18n } = useTranslation();
-  const { snapshot, now, preferTrained, charById, cardById, musicById, stampById } =
+  const { snapshot, now, preferTrained, charById, cardById, eventById, musicById, stampById } =
     useCountdownData();
   const [quickMetric, setQuickMetric] = useState<QuickMetricKey>('focus');
   const [sortMode, setSortMode] = useState<SortMode>('days');
+  const [quickQuery, setQuickQuery] = useState('');
 
   const bannerState = useMemo(() => getBannerTimelineState(snapshot, now), [snapshot, now]);
   const focus = useMemo(() => computeFocusMetrics(snapshot, now), [snapshot, now]);
@@ -514,8 +517,31 @@ export function OverviewHub() {
                 : quickMetric === 'alt_vocal'
                   ? extras.altVocals
                   : extras.stamps;
-    return sortClocks(raw, sortMode);
-  }, [quickMetric, sortMode, focus, cards, mixed, extras]);
+    const sorted = sortClocks(raw, sortMode);
+    if (!quickQuery.trim()) return sorted;
+    return sorted.filter((clock) =>
+      matchesClockQuery(quickQuery, clock, {
+        charById,
+        cardById,
+        eventById,
+        musicById,
+        stampById
+      })
+    );
+  }, [
+    quickMetric,
+    sortMode,
+    quickQuery,
+    focus,
+    cards,
+    mixed,
+    extras,
+    charById,
+    cardById,
+    eventById,
+    musicById,
+    stampById
+  ]);
 
   const heroPrimary = bannerState.activeEvent ?? bannerState.latestPastEvent;
   const heroPrimaryMode = bannerState.activeEvent ? 'live' : 'ended';
@@ -667,17 +693,20 @@ export function OverviewHub() {
             </Text>
           </Stack>
 
-          <HStack gap="1" flexWrap="wrap">
-            {(['days', 'overdue', 'character'] as SortMode[]).map((m) => (
-              <Button
-                key={m}
-                size="xs"
-                variant={sortMode === m ? 'solid' : 'subtle'}
-                onClick={() => setSortMode(m)}
-              >
-                {t(`common.sort_${m}`)}
-              </Button>
-            ))}
+          <HStack gap="2" flexWrap="wrap">
+            <InlineFilterInput value={quickQuery} onChange={setQuickQuery} maxW="240px" />
+            <HStack gap="1" flexWrap="wrap">
+              {(['days', 'overdue', 'character'] as SortMode[]).map((m) => (
+                <Button
+                  key={m}
+                  size="xs"
+                  variant={sortMode === m ? 'solid' : 'subtle'}
+                  onClick={() => setSortMode(m)}
+                >
+                  {t(`common.sort_${m}`)}
+                </Button>
+              ))}
+            </HStack>
           </HStack>
         </Flex>
 
@@ -704,87 +733,56 @@ export function OverviewHub() {
           ))}
         </Wrap>
 
-        <Grid gap="2.5" columns={{ base: 2, sm: 3, md: 4, lg: 5, xl: 6 }}>
-          {quickClocks.map((clock, idx) => {
-            const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
-            if (!ch) return null;
-            const pal = SEVERITY_PALETTE[clock.severity];
-            const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
-            const music = clock.latest?.musicId ? musicById.get(clock.latest.musicId) : undefined;
-            const stamp = clock.latest?.stampId ? stampById.get(clock.latest.stampId) : undefined;
+        {quickClocks.length === 0 ? (
+          <EmptyFilterState query={quickQuery} onClear={() => setQuickQuery('')} />
+        ) : (
+          <Grid gap="2.5" columns={{ base: 2, sm: 3, md: 4, lg: 5, xl: 6 }}>
+            {quickClocks.map((clock, idx) => {
+              const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
+              if (!ch) return null;
+              const pal = SEVERITY_PALETTE[clock.severity];
+              const card = clock.latest?.cardId ? cardById.get(clock.latest.cardId) : undefined;
+              const music = clock.latest?.musicId ? musicById.get(clock.latest.musicId) : undefined;
+              const stamp = clock.latest?.stampId ? stampById.get(clock.latest.stampId) : undefined;
 
-            return (
-              <Link
-                className={css({
-                  display: 'flex',
-                  position: 'relative',
-                  gap: '2',
-                  flexDirection: 'column',
-                  rounded: 'xl',
-                  borderWidth: '1px',
-                  p: '2.5',
-                  bg: 'bg.subtle',
-                  transition: 'transform 0.12s ease',
-                  _hover: { transform: 'translateY(-2px)', textDecoration: 'none' }
-                })}
-                key={ch.id}
-                href={characterHref(ch.id)}
-                style={{
-                  borderColor:
-                    clock.severity === 'record' || clock.severity === 'overdue'
-                      ? pal.border
-                      : undefined
-                }}
-              >
-                <HStack justifyContent="space-between" alignItems="center">
-                  <HStack gap="1.5" minW="0">
-                    <CharacterIcon characterId={ch.id} size={26} />
-                    <span
-                      className={css({
-                        fontSize: 'xs',
-                        fontWeight: 'bold',
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap'
-                      })}
-                    >
-                      {charDisplayName(ch, i18n.language, true)}
-                    </span>
-                  </HStack>
-                  <span
-                    className={css({
-                      color: 'fg.muted',
-                      fontSize: '2xs',
-                      fontVariantNumeric: 'tabular-nums'
-                    })}
-                  >
-                    #{idx + 1}
-                  </span>
-                </HStack>
-
-                <HStack gap="2.5" alignItems="center">
-                  {stamp ? (
-                    <StampTile stamp={stamp} size={46} />
-                  ) : card ? (
-                    <CardThumbTile card={card} preferTrained={preferTrained} size={46} />
-                  ) : music ? (
-                    <SongJacketTile music={music} size={46} />
-                  ) : (
-                    <Box flexShrink={0} rounded="lg" w="46px" h="46px" bg="bg.muted" />
-                  )}
-
-                  <Stack gap="0" minW="0">
-                    <span
-                      className={css({
-                        fontSize: 'xl',
-                        fontWeight: 'black',
-                        fontVariantNumeric: 'tabular-nums',
-                        lineHeight: '1.05'
-                      })}
-                      style={{ color: pal.text }}
-                    >
-                      {t('common.days', { count: clock.daysSince })}
-                    </span>
+              return (
+                <Link
+                  className={css({
+                    display: 'flex',
+                    position: 'relative',
+                    gap: '2',
+                    flexDirection: 'column',
+                    rounded: 'xl',
+                    borderWidth: '1px',
+                    p: '2.5',
+                    bg: 'bg.subtle',
+                    transition: 'transform 0.12s ease',
+                    _hover: { transform: 'translateY(-2px)', textDecoration: 'none' }
+                  })}
+                  key={ch.id}
+                  href={characterHref(ch.id)}
+                  style={{
+                    borderColor:
+                      clock.severity === 'record' || clock.severity === 'overdue'
+                        ? pal.border
+                        : undefined
+                  }}
+                >
+                  <HStack justifyContent="space-between" alignItems="center">
+                    <HStack gap="1.5" minW="0">
+                      <CharacterIcon characterId={ch.id} size={26} />
+                      <span
+                        className={css({
+                          fontSize: 'xs',
+                          fontWeight: 'bold',
+                          textOverflow: 'ellipsis',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap'
+                        })}
+                      >
+                        {charDisplayName(ch, i18n.language, true)}
+                      </span>
+                    </HStack>
                     <span
                       className={css({
                         color: 'fg.muted',
@@ -792,18 +790,53 @@ export function OverviewHub() {
                         fontVariantNumeric: 'tabular-nums'
                       })}
                     >
-                      {clock.count > 0
-                        ? formatDateShort(clock.lastTimestamp, i18n.language)
-                        : t('common.never')}
+                      #{idx + 1}
                     </span>
-                  </Stack>
-                </HStack>
+                  </HStack>
 
-                <DroughtMeter clock={clock} compact />
-              </Link>
-            );
-          })}
-        </Grid>
+                  <HStack gap="2.5" alignItems="center">
+                    {stamp ? (
+                      <StampTile stamp={stamp} size={46} />
+                    ) : card ? (
+                      <CardThumbTile card={card} preferTrained={preferTrained} size={46} />
+                    ) : music ? (
+                      <SongJacketTile music={music} size={46} />
+                    ) : (
+                      <Box flexShrink={0} rounded="lg" w="46px" h="46px" bg="bg.muted" />
+                    )}
+
+                    <Stack gap="0" minW="0">
+                      <span
+                        className={css({
+                          fontSize: 'xl',
+                          fontWeight: 'black',
+                          fontVariantNumeric: 'tabular-nums',
+                          lineHeight: '1.05'
+                        })}
+                        style={{ color: pal.text }}
+                      >
+                        {t('common.days', { count: clock.daysSince })}
+                      </span>
+                      <span
+                        className={css({
+                          color: 'fg.muted',
+                          fontSize: '2xs',
+                          fontVariantNumeric: 'tabular-nums'
+                        })}
+                      >
+                        {clock.count > 0
+                          ? formatDateShort(clock.lastTimestamp, i18n.language)
+                          : t('common.never')}
+                      </span>
+                    </Stack>
+                  </HStack>
+
+                  <DroughtMeter clock={clock} compact />
+                </Link>
+              );
+            })}
+          </Grid>
+        )}
       </Stack>
     </Stack>
   );

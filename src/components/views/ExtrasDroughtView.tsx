@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-system/css';
 import { Box, Grid, HStack, Stack, Wrap } from 'styled-system/jsx';
+import { EmptyFilterState, InlineFilterInput } from '~/components/search/InlineFilterInput';
 import {
   DroughtLeaderboardRow,
   DroughtMeter,
@@ -29,6 +30,13 @@ import {
 } from '~/utils/countdown/format';
 import { computeExtrasMetrics } from '~/utils/countdown/metrics';
 import { characterHref } from '~/utils/countdown/routes';
+import {
+  characterSearchHaystack,
+  matchesClockQuery,
+  matchesTokens,
+  normalizeSearchText,
+  tokenizeQuery
+} from '~/utils/countdown/search';
 
 type ExtrasTab = 'alt_vocal' | 'unit_songs' | 'duos' | 'stamps';
 
@@ -94,34 +102,70 @@ function UnitMusicClockCell({
 
 export function ExtrasDroughtView() {
   const { t, i18n } = useTranslation();
-  const { snapshot, now, preferTrained, charById, cardById, musicById, stampById } =
+  const { snapshot, now, preferTrained, charById, cardById, eventById, musicById, stampById } =
     useCountdownData();
   const [tab, setTab] = useState<ExtrasTab>('alt_vocal');
   const [unitFilter, setUnitFilter] = useState<SekaiUnitId | 'all'>('all');
   const [sortMode, setSortMode] = useState<SortMode>('days');
   const [selectedDuoCharId, setSelectedDuoCharId] = useState<number>(20);
   const [sameUnitDuosOnly, setSameUnitDuosOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const lookups = useMemo(
+    () => ({ charById, cardById, eventById, musicById, stampById }),
+    [charById, cardById, eventById, musicById, stampById]
+  );
 
   const extras = useMemo(() => computeExtrasMetrics(snapshot, now), [snapshot, now]);
 
   const altVocalClocks = useMemo(() => {
-    const filtered =
-      unitFilter === 'all'
-        ? extras.altVocals
-        : extras.altVocals.filter((c) => c.unitId === unitFilter);
+    const filtered = extras.altVocals.filter(
+      (c) =>
+        (unitFilter === 'all' || c.unitId === unitFilter) &&
+        matchesClockQuery(searchQuery, c, lookups)
+    );
     return sortClocks(filtered, sortMode);
-  }, [extras, unitFilter, sortMode]);
+  }, [extras, unitFilter, sortMode, searchQuery, lookups]);
 
   const stampClocks = useMemo(() => {
-    const filtered =
-      unitFilter === 'all' ? extras.stamps : extras.stamps.filter((c) => c.unitId === unitFilter);
+    const filtered = extras.stamps.filter(
+      (c) =>
+        (unitFilter === 'all' || c.unitId === unitFilter) &&
+        matchesClockQuery(searchQuery, c, lookups)
+    );
     return sortClocks(filtered, sortMode);
-  }, [extras, unitFilter, sortMode]);
+  }, [extras, unitFilter, sortMode, searchQuery, lookups]);
+
+  const filteredUnitSongs = useMemo(() => {
+    if (!searchQuery.trim()) return extras.unitSongs;
+    return extras.unitSongs.filter((u) =>
+      [u.commissioned, u.cover, u.mv3d, u.mv2d].some((clock) =>
+        matchesClockQuery(searchQuery, clock, lookups)
+      )
+    );
+  }, [extras.unitSongs, searchQuery, lookups]);
 
   const duoList = useMemo(() => {
-    const list = extras.duoPairingsForCharacter(selectedDuoCharId);
-    return sameUnitDuosOnly ? list.filter((p) => p.sameUnit) : list;
-  }, [extras, selectedDuoCharId, sameUnitDuosOnly]);
+    const base = extras.duoPairingsForCharacter(selectedDuoCharId);
+    const list = sameUnitDuosOnly ? base.filter((p) => p.sameUnit) : base;
+    const tokens = tokenizeQuery(searchQuery);
+    if (tokens.length === 0) return list;
+    return list.filter((duo) => {
+      const partnerId = duo.charA === selectedDuoCharId ? duo.charB : duo.charA;
+      const partner = charById.get(partnerId);
+      if (!partner) return false;
+      const hay = normalizeSearchText(
+        [
+          characterSearchHaystack(partner),
+          duo.sharedCount === 0 ? 'never 未共演' : '',
+          duo.latestEvent?.nickname ?? '',
+          duo.latestEvent?.nameEn ?? '',
+          duo.latestEvent?.nameJa ?? ''
+        ].join(' ')
+      );
+      return matchesTokens(hay, tokens);
+    });
+  }, [extras, selectedDuoCharId, sameUnitDuosOnly, searchQuery, charById]);
 
   return (
     <Stack gap="6">
@@ -161,76 +205,89 @@ export function ExtrasDroughtView() {
             onUnitFilterChange={setUnitFilter}
             sortMode={sortMode}
             onSortModeChange={setSortMode}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
           />
-          <Stack gap="2.5">
-            {altVocalClocks.map((clock, idx) => {
-              const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
-              if (!ch) return null;
-              const song = clock.latest?.musicId ? musicById.get(clock.latest.musicId) : undefined;
-              return (
-                <DroughtLeaderboardRow
-                  key={ch.id}
-                  rank={idx + 1}
-                  character={ch}
-                  clock={clock}
-                  music={song}
-                  preferTrained={preferTrained}
-                  extraBadge={
-                    clock.latest?.sublabel ? (
-                      <span className={css({ color: 'fg.muted', fontSize: '2xs' })}>
-                        ({clock.latest.sublabel})
-                      </span>
-                    ) : undefined
-                  }
-                />
-              );
-            })}
-          </Stack>
+          {altVocalClocks.length === 0 ? (
+            <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+          ) : (
+            <Stack gap="2.5">
+              {altVocalClocks.map((clock, idx) => {
+                const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
+                if (!ch) return null;
+                const song = clock.latest?.musicId
+                  ? musicById.get(clock.latest.musicId)
+                  : undefined;
+                return (
+                  <DroughtLeaderboardRow
+                    key={ch.id}
+                    rank={idx + 1}
+                    character={ch}
+                    clock={clock}
+                    music={song}
+                    preferTrained={preferTrained}
+                    extraBadge={
+                      clock.latest?.sublabel ? (
+                        <span className={css({ color: 'fg.muted', fontSize: '2xs' })}>
+                          ({clock.latest.sublabel})
+                        </span>
+                      ) : undefined
+                    }
+                  />
+                );
+              })}
+            </Stack>
+          )}
         </Stack>
       )}
 
       {tab === 'unit_songs' && (
         <Stack gap="4">
-          {extras.unitSongs.map((u) => (
-            <Box
-              key={u.unit}
-              borderColor="border.default"
-              rounded="2xl"
-              borderWidth="1px"
-              p="4"
-              bg="bg.subtle"
-            >
-              <Stack gap="3">
-                <UnitBadge unit={u.unit} />
-                <Grid gap="3" columns={{ base: 1, sm: 2, lg: 4 }}>
-                  <UnitMusicClockCell
-                    label="Commissioned Song"
-                    clock={u.commissioned}
-                    musicById={musicById}
-                    locale={i18n.language}
-                  />
-                  <UnitMusicClockCell
-                    label="Cover Song"
-                    clock={u.cover}
-                    musicById={musicById}
-                    locale={i18n.language}
-                  />
-                  <UnitMusicClockCell
-                    label="3DMV"
-                    clock={u.mv3d}
-                    musicById={musicById}
-                    locale={i18n.language}
-                  />
-                  <UnitMusicClockCell
-                    label="2DMV"
-                    clock={u.mv2d}
-                    musicById={musicById}
-                    locale={i18n.language}
-                  />
-                </Grid>
-              </Stack>
-            </Box>
-          ))}
+          <InlineFilterInput value={searchQuery} onChange={setSearchQuery} maxW="300px" />
+          {filteredUnitSongs.length === 0 ? (
+            <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+          ) : (
+            filteredUnitSongs.map((u) => (
+              <Box
+                key={u.unit}
+                borderColor="border.default"
+                rounded="2xl"
+                borderWidth="1px"
+                p="4"
+                bg="bg.subtle"
+              >
+                <Stack gap="3">
+                  <UnitBadge unit={u.unit} />
+                  <Grid gap="3" columns={{ base: 1, sm: 2, lg: 4 }}>
+                    <UnitMusicClockCell
+                      label="Commissioned Song"
+                      clock={u.commissioned}
+                      musicById={musicById}
+                      locale={i18n.language}
+                    />
+                    <UnitMusicClockCell
+                      label="Cover Song"
+                      clock={u.cover}
+                      musicById={musicById}
+                      locale={i18n.language}
+                    />
+                    <UnitMusicClockCell
+                      label="3DMV"
+                      clock={u.mv3d}
+                      musicById={musicById}
+                      locale={i18n.language}
+                    />
+                    <UnitMusicClockCell
+                      label="2DMV"
+                      clock={u.mv2d}
+                      musicById={musicById}
+                      locale={i18n.language}
+                    />
+                  </Grid>
+                </Stack>
+              </Box>
+            ))
+          )}
         </Stack>
       )}
 
@@ -357,13 +414,16 @@ export function ExtrasDroughtView() {
               <Text fontSize="md" fontWeight="bold">
                 {t('extras.duo_pick_char')}
               </Text>
-              <Button
-                size="xs"
-                variant={sameUnitDuosOnly ? 'solid' : 'outline'}
-                onClick={() => setSameUnitDuosOnly(!sameUnitDuosOnly)}
-              >
-                {sameUnitDuosOnly ? '✓ Same Unit Only' : 'Same Unit Only'}
-              </Button>
+              <Wrap gap="2" alignItems="center">
+                <InlineFilterInput value={searchQuery} onChange={setSearchQuery} maxW="240px" />
+                <Button
+                  size="xs"
+                  variant={sameUnitDuosOnly ? 'solid' : 'outline'}
+                  onClick={() => setSameUnitDuosOnly(!sameUnitDuosOnly)}
+                >
+                  {sameUnitDuosOnly ? '✓ Same Unit Only' : 'Same Unit Only'}
+                </Button>
+              </Wrap>
             </HStack>
 
             <Wrap gap="1.5">
@@ -380,59 +440,63 @@ export function ExtrasDroughtView() {
               ))}
             </Wrap>
 
-            <Grid gap="2.5" columns={{ base: 1, sm: 2, md: 3, lg: 4 }}>
-              {duoList.map((duo) => {
-                const partnerId = duo.charA === selectedDuoCharId ? duo.charB : duo.charA;
-                const partner = charById.get(partnerId);
-                if (!partner) return null;
-                return (
-                  <Link
-                    className={css({
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      borderColor: 'border.subtle',
-                      rounded: 'xl',
-                      borderWidth: '1px',
-                      p: '3',
-                      bg: 'bg.subtle',
-                      _hover: { textDecoration: 'none', bg: 'bg.muted/40' }
-                    })}
-                    style={
-                      duo.sharedCount === 0 ? { borderColor: 'rgba(244,63,94,0.5)' } : undefined
-                    }
-                    key={partnerId}
-                    href={characterHref(partnerId)}
-                  >
-                    <HStack gap="2">
-                      <CharacterIcon characterId={partnerId} size={32} />
-                      <Stack gap="0">
-                        <span className={css({ fontSize: 'xs', fontWeight: 'bold' })}>
-                          {charDisplayName(partner, i18n.language, true)}
-                        </span>
-                        <span className={css({ color: 'fg.muted', fontSize: '2xs' })}>
-                          {duo.sharedCount > 0
-                            ? `${formatDateShort(duo.lastTimestamp, i18n.language)} · ${duo.sharedCount}×`
-                            : t('common.never')}
-                        </span>
-                      </Stack>
-                    </HStack>
-                    <span
+            {duoList.length === 0 ? (
+              <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+            ) : (
+              <Grid gap="2.5" columns={{ base: 1, sm: 2, md: 3, lg: 4 }}>
+                {duoList.map((duo) => {
+                  const partnerId = duo.charA === selectedDuoCharId ? duo.charB : duo.charA;
+                  const partner = charById.get(partnerId);
+                  if (!partner) return null;
+                  return (
+                    <Link
                       className={css({
-                        fontSize: 'md',
-                        fontWeight: 'black',
-                        fontVariantNumeric: 'tabular-nums'
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        borderColor: 'border.subtle',
+                        rounded: 'xl',
+                        borderWidth: '1px',
+                        p: '3',
+                        bg: 'bg.subtle',
+                        _hover: { textDecoration: 'none', bg: 'bg.muted/40' }
                       })}
-                      style={{ color: duo.sharedCount === 0 ? '#e11d48' : '#f59e0b' }}
+                      style={
+                        duo.sharedCount === 0 ? { borderColor: 'rgba(244,63,94,0.5)' } : undefined
+                      }
+                      key={partnerId}
+                      href={characterHref(partnerId)}
                     >
-                      {duo.sharedCount === 0
-                        ? t('common.never')
-                        : t('common.days', { count: duo.daysSince })}
-                    </span>
-                  </Link>
-                );
-              })}
-            </Grid>
+                      <HStack gap="2">
+                        <CharacterIcon characterId={partnerId} size={32} />
+                        <Stack gap="0">
+                          <span className={css({ fontSize: 'xs', fontWeight: 'bold' })}>
+                            {charDisplayName(partner, i18n.language, true)}
+                          </span>
+                          <span className={css({ color: 'fg.muted', fontSize: '2xs' })}>
+                            {duo.sharedCount > 0
+                              ? `${formatDateShort(duo.lastTimestamp, i18n.language)} · ${duo.sharedCount}×`
+                              : t('common.never')}
+                          </span>
+                        </Stack>
+                      </HStack>
+                      <span
+                        className={css({
+                          fontSize: 'md',
+                          fontWeight: 'black',
+                          fontVariantNumeric: 'tabular-nums'
+                        })}
+                        style={{ color: duo.sharedCount === 0 ? '#e11d48' : '#f59e0b' }}
+                      >
+                        {duo.sharedCount === 0
+                          ? t('common.never')
+                          : t('common.days', { count: duo.daysSince })}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </Grid>
+            )}
           </Stack>
         </Stack>
       )}
@@ -444,24 +508,32 @@ export function ExtrasDroughtView() {
             onUnitFilterChange={setUnitFilter}
             sortMode={sortMode}
             onSortModeChange={setSortMode}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
           />
-          <Stack gap="2.5">
-            {stampClocks.map((clock, idx) => {
-              const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
-              if (!ch) return null;
-              const stamp = clock.latest?.stampId ? stampById.get(clock.latest.stampId) : undefined;
-              return (
-                <DroughtLeaderboardRow
-                  key={ch.id}
-                  rank={idx + 1}
-                  character={ch}
-                  clock={clock}
-                  stamp={stamp}
-                  preferTrained={preferTrained}
-                />
-              );
-            })}
-          </Stack>
+          {stampClocks.length === 0 ? (
+            <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />
+          ) : (
+            <Stack gap="2.5">
+              {stampClocks.map((clock, idx) => {
+                const ch = clock.characterId ? charById.get(clock.characterId) : undefined;
+                if (!ch) return null;
+                const stamp = clock.latest?.stampId
+                  ? stampById.get(clock.latest.stampId)
+                  : undefined;
+                return (
+                  <DroughtLeaderboardRow
+                    key={ch.id}
+                    rank={idx + 1}
+                    character={ch}
+                    clock={clock}
+                    stamp={stamp}
+                    preferTrained={preferTrained}
+                  />
+                );
+              })}
+            </Stack>
+          )}
         </Stack>
       )}
     </Stack>
