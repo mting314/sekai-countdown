@@ -22,6 +22,7 @@ import { Text } from '~/components/ui/text';
 import { useCountdownData } from '~/context/CountdownDataContext';
 import type { DroughtClock, SekaiUnitId } from '~/types/countdown';
 import { eventStoryBannerUrl } from '~/utils/countdown/assets';
+import { ALL_UNITS } from '~/utils/countdown/constants';
 import {
   charDisplayName,
   formatDateShort,
@@ -426,19 +427,38 @@ export function ExtrasDroughtView() {
               </Wrap>
             </HStack>
 
-            <Wrap gap="1.5">
-              {snapshot.characters.map((ch) => (
-                <Button
-                  key={ch.id}
-                  size="xs"
-                  variant={selectedDuoCharId === ch.id ? 'solid' : 'outline'}
-                  onClick={() => setSelectedDuoCharId(ch.id)}
-                >
-                  <CharacterIcon characterId={ch.id} size={18} />
-                  {charDisplayName(ch, i18n.language, true)}
-                </Button>
-              ))}
-            </Wrap>
+            <Grid gap="2" columns={{ base: 1, md: 2, xl: 3 }}>
+              {ALL_UNITS.map((unit) => {
+                const members = snapshot.characters.filter((c) => c.unit === unit);
+                return (
+                  <HStack
+                    key={unit}
+                    gap="1.5"
+                    alignItems="center"
+                    borderColor="border.subtle"
+                    rounded="xl"
+                    borderWidth="1px"
+                    py="1.5"
+                    px="2.5"
+                    bg="bg.subtle"
+                    flexWrap="wrap"
+                  >
+                    <UnitBadge unit={unit} short size="xs" />
+                    {members.map((ch) => (
+                      <Button
+                        key={ch.id}
+                        size="xs"
+                        variant={selectedDuoCharId === ch.id ? 'solid' : 'outline'}
+                        onClick={() => setSelectedDuoCharId(ch.id)}
+                      >
+                        <CharacterIcon characterId={ch.id} size={16} />
+                        {charDisplayName(ch, i18n.language, true)}
+                      </Button>
+                    ))}
+                  </HStack>
+                );
+              })}
+            </Grid>
 
             {duoList.length === 0 ? (
               <EmptyFilterState query={searchQuery} onClear={() => setSearchQuery('')} />

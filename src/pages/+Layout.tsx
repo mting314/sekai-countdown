@@ -14,6 +14,8 @@ import { Link } from '~/components/ui/link';
 import { Button } from '~/components/ui/styled/button';
 import { IconButton } from '~/components/ui/styled/icon-button';
 import { useCountdownData } from '~/context/CountdownDataContext';
+import { unitIconUrl } from '~/utils/countdown/assets';
+import { ALL_UNITS, UNIT_META } from '~/utils/countdown/constants';
 import { charDisplayName } from '~/utils/countdown/format';
 import { characterHref, homeHref } from '~/utils/countdown/routes';
 
@@ -170,30 +172,113 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </Container>
       </Box>
 
-      {/* Quick 26-Character Avatar Strip for 1-click Character Dossier jump */}
+      {/* Unit-Grouped 26-Character Dossier Bar */}
       <Box borderColor="border.subtle" borderBottomWidth="1px" bg="bg.subtle/60">
-        <Container w="full" py="1.5" px="4">
-          <HStack className={css({ scrollbarWidth: 'none' })} gap="1.5" py="0.5" overflowX="auto">
-            {snapshot.characters.map((ch) => {
-              const active = currentPath.endsWith(`/characters/${ch.id}`);
+        <Container w="full" py="2" px="4">
+          <Box
+            className={css({
+              display: { base: 'flex', sm: 'grid' },
+              gap: '2',
+              gridTemplateColumns: {
+                sm: 'repeat(2, minmax(0, 1fr))',
+                lg: 'repeat(3, minmax(0, 1fr))'
+              },
+              flexWrap: 'wrap'
+            })}
+          >
+            {ALL_UNITS.map((unit) => {
+              const meta = UNIT_META[unit];
+              const members = snapshot.characters.filter((c) => c.unit === unit);
+              const hasActiveChar = members.some((ch) =>
+                currentPath.endsWith(`/characters/${ch.id}`)
+              );
+
               return (
-                <Link
-                  className={css({
-                    flexShrink: 0,
-                    rounded: 'full',
-                    transition: 'transform 0.12s ease',
-                    _hover: { transform: 'scale(1.12)' }
-                  })}
-                  style={active ? { transform: 'scale(1.12)' } : undefined}
-                  key={ch.id}
-                  href={characterHref(ch.id)}
-                  title={`${charDisplayName(ch, i18n.language)} — ${t('common.view_dossier')}`}
+                <HStack
+                  key={unit}
+                  style={{
+                    borderColor: hasActiveChar ? meta.color : `${meta.color}45`,
+                    background: hasActiveChar ? `${meta.color}16` : undefined
+                  }}
+                  gap="2"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  rounded="xl"
+                  borderWidth="1px"
+                  py="1"
+                  px="2.5"
+                  bg="bg.default/80"
                 >
-                  <CharacterIcon characterId={ch.id} size={28} />
-                </Link>
+                  <HStack gap="1.5" minW="0">
+                    <img
+                      src={unitIconUrl(unit)}
+                      alt=""
+                      width={18}
+                      height={18}
+                      loading="lazy"
+                      className={css({ flexShrink: 0 })}
+                    />
+                    <Box
+                      as="span"
+                      className={css({
+                        color: 'fg.muted',
+                        fontSize: 'xs',
+                        fontWeight: 'bold',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                      })}
+                      hideBelow="xl"
+                    >
+                      {i18n.language.startsWith('ja') ? meta.nameJa : meta.nameEn}
+                    </Box>
+                    <Box
+                      as="span"
+                      className={css({
+                        color: 'fg.muted',
+                        fontSize: '2xs',
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap'
+                      })}
+                      hideFrom="xl"
+                      hideBelow="sm"
+                    >
+                      {meta.shortEn}
+                    </Box>
+                  </HStack>
+
+                  <HStack gap="1" flexShrink={0}>
+                    {members.map((ch) => {
+                      const active = currentPath.endsWith(`/characters/${ch.id}`);
+                      return (
+                        <Link
+                          className={css({
+                            flexShrink: 0,
+                            rounded: 'full',
+                            transition: 'transform 0.12s ease',
+                            _hover: { transform: 'scale(1.14)' }
+                          })}
+                          style={
+                            active
+                              ? {
+                                  transform: 'scale(1.14)',
+                                  boxShadow: `0 0 0 2px ${ch.color}`
+                                }
+                              : undefined
+                          }
+                          key={ch.id}
+                          href={characterHref(ch.id)}
+                          title={`${charDisplayName(ch, i18n.language)} — ${t('common.view_dossier')}`}
+                        >
+                          <CharacterIcon characterId={ch.id} size={26} />
+                        </Link>
+                      );
+                    })}
+                  </HStack>
+                </HStack>
               );
             })}
-          </HStack>
+          </Box>
         </Container>
       </Box>
 
