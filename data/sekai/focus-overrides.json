@@ -1,0 +1,4 @@
+{
+  "_comment": "event_id -> focus character id (0 = force-exclude). Only for events where bannerGameCharacterUnitId differs from the story protagonist.",
+  "97": 10
+}

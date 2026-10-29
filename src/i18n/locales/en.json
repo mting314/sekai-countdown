@@ -1,0 +1,152 @@
+{
+  "site_name": "Sekai Countdown",
+  "title": "Project Sekai Countdown — Focus, Lim & Rotation Tracker",
+  "description": "Live 'days since' drought clocks, focus event rotation matrices, limited 4★ trackers, and Virtual Singer sub-unit breakdowns for Project SEKAI.",
+  "navigation": {
+    "overview": "Overview",
+    "focus": "Focus & Rotation",
+    "cards": "4★ & Lim Jail",
+    "virtual_singers": "Virtual Singers",
+    "mixed_attrs": "Mixed & Attributes",
+    "extras": "Songs & Extras"
+  },
+  "header": {
+    "trained_art": "Trained Art",
+    "untrained_art": "Untrained Art",
+    "sync_live": "Sync DB",
+    "syncing": "Syncing…",
+    "live_ready": "Live JP DB",
+    "snapshot_ready": "Snapshot DB",
+    "jump_character": "Character Dossier"
+  },
+  "common": {
+    "menu": "Menu",
+    "days": "{{count}}d",
+    "days_long": "{{count}} days",
+    "events_ago": "{{count}} events ago",
+    "avg_gap": "Avg {{days}}d",
+    "max_gap": "Max {{days}}d",
+    "record_wait": "NEW RECORD",
+    "upcoming_reset": "Upcoming!",
+    "never": "Never",
+    "total_count": "{{count}} total",
+    "all_units": "All Units",
+    "sort_days": "Longest Wait",
+    "sort_overdue": "Most Overdue (vs Avg)",
+    "sort_character": "Character Order",
+    "view_dossier": "Open character dossier"
+  },
+  "overview": {
+    "hero_live": "LIVE JP EVENT",
+    "hero_ended": "LATEST JP EVENT",
+    "hero_upcoming": "UPCOMING PRELOADED JP EVENT",
+    "ends_in": "Ends in {{time}}",
+    "starts_in": "Starts in {{time}}",
+    "podium_title": "Most Overdue Right Now",
+    "podium_subtitle": "Characters with the longest active droughts across key Project SEKAI cycles, rendered with their latest card cutouts.",
+    "record_strip_title": "Active All-Time Record Waits",
+    "record_strip_subtitle": "Characters whose current wait has surpassed their longest historical gap in this category.",
+    "quick_grid_title": "All-Character Snapshot Grid",
+    "quick_grid_subtitle": "Switch categories to compare all 26 characters at a glance (@countdown_prsk style)."
+  },
+  "focus": {
+    "title": "Focus Events & Rotation Tracker",
+    "subtitle": "Track solo focus event droughts, unit-level pacing, Hakolims, and who jumped ahead in the current rotation cycle.",
+    "unit_strip_title": "Unit Focus Pacing (5 Main Units)",
+    "rotation_matrix_title": "Per-Unit Focus Cycle Matrix & Rotation Jumps",
+    "rotation_matrix_subtitle": "Highlights members still waiting to finish the current cycle vs. unitmates who already jumped to the next cycle.",
+    "cycle_jump_badge": "Cycle Jump",
+    "queue_jump_badge": "Jumped Queue",
+    "waiting_slot": "Waiting (#{{cycle}})",
+    "leaderboard_title": "20-Character Solo Focus Leaderboard",
+    "mode_all": "All Solo Focuses",
+    "mode_hakolim": "Hakolim (Limited Focus) Only"
+  },
+  "cards": {
+    "title": "4★ & Limited Gacha Droughts",
+    "subtitle": "Compare 'Lim Jail' (hairstyle limiteds), ColorFes/BloomFes status, Permanent 4★ droughts, and F2P event shop rewards.",
+    "tab_lim4": "Hairstyle Lim 4★",
+    "tab_any4": "Any 4★",
+    "tab_fes": "ColorFes & BloomFes",
+    "tab_perm4": "Permanent 4★",
+    "tab_event3": "Event 3★",
+    "tab_event2": "Event 2★",
+    "include_wl": "Include World Link Lims",
+    "include_collab": "Include Collab Lims",
+    "bloomfes_waiting_title": "BloomFes Waiting Room (0 BloomFes Cards Yet)",
+    "bloomfes_waiting_subtitle": "Characters still due for their very first Bloom Festival limited 4★."
+  },
+  "vs": {
+    "title": "Virtual Singer Niche Tracker",
+    "subtitle": "When each Virtual Singer was last featured in a main-unit focus event, across all 30 SEKAI sub-unit variants, and on VS banners.",
+    "slot_4star": "Unit-Focus 4★ Gacha Slot",
+    "slot_any_card": "Unit-Focus Any Event Card",
+    "slot_song": "Unit-Focus Commissioned Song",
+    "matrix_title": "6 × 5 SEKAI Sub-Unit Virtual Singer Matrix",
+    "matrix_subtitle": "Days since each SEKAI-specific Virtual Singer (via supportUnit) received a card.",
+    "matrix_4star": "4★ Cards Only",
+    "matrix_any": "All Event/Gacha Cards (2★–4★)",
+    "vs_banner_title": "Dedicated Virtual Singer Banner Events"
+  },
+  "mixed": {
+    "title": "Mixed Events & Attribute Starvation",
+    "subtitle": "Multi-unit shuffle event droughts and the 26 × 5 card attribute heatmap highlighting 800+ day attribute gaps.",
+    "mode_banner": "Mixed Banner Protagonist",
+    "mode_4star": "Mixed Event 4★ Lineup",
+    "mode_any": "Mixed Event Any Card",
+    "attr_title": "26 × 5 Card Attribute Starvation Heatmap",
+    "attr_subtitle": "Days since each character received a 4★ in Cool, Cute, Pure, Happy, or Mysterious.",
+    "attr_all4": "All 4★ Cards",
+    "attr_lim4": "Hairstyle Lim 4★ Only"
+  },
+  "extras": {
+    "title": "Songs, Alt Vocals, Co-Banner Duos & Stamps",
+    "subtitle": "Niche countdowns for Another Vocal covers, unit MV/cover pacing, 4★ co-banner pairings, and character stamps.",
+    "tab_alt_vocal": "Alt Vocals",
+    "tab_unit_songs": "Unit Songs & MVs",
+    "tab_duos": "Co-4★ Banner Duos",
+    "tab_stamps": "Illustration Stamps",
+    "duo_pick_char": "Inspect pairings for:",
+    "duo_same_unit_top": "Most Overdue Same-Unit 4★ Pairings"
+  },
+  "clocks": {
+    "solo_focus": "Solo Focus Event",
+    "hakolim": "Hakolim (Limited Focus)",
+    "vs_unit_4star": "Unit-Focus 4★ Slot",
+    "vs_unit_song": "Unit-Focus Song Vocal",
+    "vs_banner": "VS Banner Focus",
+    "any_4star": "Any 4★ Card",
+    "lim_4star": "Hairstyle Limited 4★",
+    "fes_4star": "Fes 4★ (ColorFes / BloomFes)",
+    "perm_4star": "Permanent 4★",
+    "mixed_banner": "Mixed Event Banner Lead",
+    "mixed_lineup": "Mixed Event Card",
+    "event_3star": "Event Reward 3★",
+    "event_2star": "Event Reward 2★",
+    "alt_vocal": "Another Vocal Cover",
+    "stamp": "Illustration Stamp"
+  },
+  "dossier": {
+    "all_clocks": "All Active Drought Clocks",
+    "attr_ring": "4★ Attribute Breakdown",
+    "sekai_subunits": "SEKAI Sub-Unit 4★ Breakdown",
+    "timeline_title": "4★ Release & Gap History",
+    "back_overview": "All Characters"
+  },
+  "error_page": {
+    "not_found": "This page doesn't exist.",
+    "home": "Back to overview",
+    "title": "Something went wrong",
+    "text": "An unexpected error occurred. Please report it on ",
+    "issues_link": "GitHub Issues",
+    "to_fix_it": " so we can fix it.",
+    "copy": "Copy error",
+    "reload": "Reload page",
+    "clear": "Reset local cache"
+  },
+  "footer": {
+    "fan_made": "Fan-made Project SEKAI countdown & rotation tracker. Not affiliated with SEGA, Colorful Palette, or Crypton Future Media.",
+    "data_from": "Data & assets via",
+    "inspired_by": "Inspired by"
+  }
+}

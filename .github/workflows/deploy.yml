@@ -1,0 +1,44 @@
+name: Deploy Github Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    # Refresh baked snapshot daily at 08:00 UTC (17:00 JST, after daily JP event/gacha updates).
+    - cron: '0 8 * * *'
+
+jobs:
+  build:
+    name: Build Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Dependencies
+        uses: ./.github/composite-actions/setup
+      - name: Refresh Sekai Master DB Snapshot
+        run: bun run fetch:data
+      - name: Build
+        run: PUBLIC_ENV__BASE_URL=/sekai-countdown bun run ci:build
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist/client
+
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

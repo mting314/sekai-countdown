@@ -1,0 +1,152 @@
+{
+  "site_name": "プロセカ未実装カウントダウン",
+  "title": "プロセカ未実装日数・箱イベローテーション追跡",
+  "description": "プロジェクトセカイのバナー（箱イベ）ローテーション、限定★4未実装日数、バチャシン出張枠、混合イベ・属性偏りを可視化するファンサイト。",
+  "navigation": {
+    "overview": "総合トップ",
+    "focus": "箱イベ・ローテ",
+    "cards": "★4・限定未実装",
+    "virtual_singers": "バチャシン枠",
+    "mixed_attrs": "混合・属性マップ",
+    "extras": "楽曲・スタンプ"
+  },
+  "header": {
+    "trained_art": "特訓後イラスト",
+    "untrained_art": "特訓前イラスト",
+    "sync_live": "最新DB同期",
+    "syncing": "同期中…",
+    "live_ready": "最新JPデータ",
+    "snapshot_ready": "スナップショット",
+    "jump_character": "キャラ別詳細"
+  },
+  "common": {
+    "menu": "メニュー",
+    "days": "{{count}}日",
+    "days_long": "{{count}}日経過",
+    "events_ago": "{{count}}イベ前",
+    "avg_gap": "平均 {{days}}日",
+    "max_gap": "過去最長 {{days}}日",
+    "record_wait": "最長記録更新中",
+    "upcoming_reset": "次回予告済!",
+    "never": "未実装",
+    "total_count": "計{{count}}回",
+    "all_units": "全ユニット",
+    "sort_days": "経過日数順",
+    "sort_overdue": "平均比超過順",
+    "sort_character": "キャラクター順",
+    "view_dossier": "キャラ別詳細を開く"
+  },
+  "overview": {
+    "hero_live": "開催中のイベント",
+    "hero_ended": "直近のイベント",
+    "hero_upcoming": "次回開催予定イベント",
+    "ends_in": "終了まで {{time}}",
+    "starts_in": "開始まで {{time}}",
+    "podium_title": "現在もっとも順番が迫っている枠",
+    "podium_subtitle": "主要な未実装カテゴリごとの経過日数トップ3（最新カード透過カットアウト表示）。",
+    "record_strip_title": "自己最長ブランク更新中",
+    "record_strip_subtitle": "過去の最大間隔を超えて未実装期間が継続している項目の一覧です。",
+    "quick_grid_title": "全26キャラ一覧グリッド",
+    "quick_grid_subtitle": "カテゴリを切り替えて全キャラクターの経過日数を一目で比較できます。"
+  },
+  "focus": {
+    "title": "ユニット箱イベ＆ローテーション追跡",
+    "subtitle": "各キャラのバナー（箱イベ）経過日数、箱限定（ハコリム）、周回追い越し（ローテ飛び）を可視化します。",
+    "unit_strip_title": "5ユニット箱イベ経過状況",
+    "rotation_matrix_title": "ユニット別バナー周回表＆ローテ飛び履歴",
+    "rotation_matrix_subtitle": "現在の周回で未消化のメンバーと、先に次周回へ進んだメンバーをハイライト表示します。",
+    "cycle_jump_badge": "周回飛び",
+    "queue_jump_badge": "順番前後",
+    "waiting_slot": "第{{cycle}}回待ち",
+    "leaderboard_title": "20キャラ箱イベ経過日数ランキング",
+    "mode_all": "すべての箱イベ",
+    "mode_hakolim": "箱限定（ハコリム）のみ"
+  },
+  "cards": {
+    "title": "★4・限定ガチャ未実装トラッカー",
+    "subtitle": "髪型付き期間限定★4、カラフェス／ブルフェス、恒常★4ブランク、イベント報酬★3／★2を比較。",
+    "tab_lim4": "髪型付き限定★4",
+    "tab_any4": "全★4カード",
+    "tab_fes": "フェス限（カラ／ブル）",
+    "tab_perm4": "恒常★4",
+    "tab_event3": "報酬★3",
+    "tab_event2": "報酬★2",
+    "include_wl": "WL（ユニットイベ限定）を含む",
+    "include_collab": "コラボ限定を含む",
+    "bloomfes_waiting_title": "ブルームフェスティバル未実装キャラ",
+    "bloomfes_waiting_subtitle": "まだブルフェス限定★4が実装されていないキャラクター一覧。"
+  },
+  "vs": {
+    "title": "バーチャル・シンガー出張＆セカイ別追跡",
+    "subtitle": "ユニット箱イベでのバチャシン★4・報酬・書き下ろし歌唱枠と、全30種のセカイ別バチャシン実装間隔。",
+    "slot_4star": "箱イベ★4ガチャ枠",
+    "slot_any_card": "箱イベ全カード枠",
+    "slot_song": "箱イベ書き下ろし歌唱枠",
+    "matrix_title": "6 × 5 セカイ別バーチャル・シンガーマトリクス",
+    "matrix_subtitle": "各セカイ所属バチャシン（supportUnit）ごとの最新カードからの経過日数。",
+    "matrix_4star": "★4のみ",
+    "matrix_any": "★2〜★4すべて",
+    "vs_banner_title": "バチャシンバナーイベント経過日数"
+  },
+  "mixed": {
+    "title": "混合イベント＆属性別★4ヒートマップ",
+    "subtitle": "混合（シャッフル）イベのバナー・登場間隔と、26キャラ×5属性の★4未実装ヒートマップ。",
+    "mode_banner": "混合イベバナー",
+    "mode_4star": "混合イベ★4枠",
+    "mode_any": "混合イベ全カード枠",
+    "attr_title": "26 × 5 属性別★4ヒートマップ",
+    "attr_subtitle": "クール・キュート・ピュア・ハッピー・ミステリアスの★4未実装日数。",
+    "attr_all4": "全★4",
+    "attr_lim4": "髪型付き限定★4のみ"
+  },
+  "extras": {
+    "title": "アナザーボーカル・楽曲MV・同ガチャペア・スタンプ",
+    "subtitle": "アナボ追加間隔、ユニット別カバー／書き下ろし／3DMV、★4同時ピックアップペア、スタンプ実装間隔。",
+    "tab_alt_vocal": "アナザーボーカル",
+    "tab_unit_songs": "ユニット楽曲・MV",
+    "tab_duos": "★4同バナーペア",
+    "tab_stamps": "イラストスタンプ",
+    "duo_pick_char": "ペア対象キャラ:",
+    "duo_same_unit_top": "同ユニット内で久しく★4共演していないペア"
+  },
+  "clocks": {
+    "solo_focus": "ユニット箱イベバナー",
+    "hakolim": "箱限定（ハコリム）",
+    "vs_unit_4star": "箱イベ★4出張枠",
+    "vs_unit_song": "箱イベ書き下ろし歌唱",
+    "vs_banner": "バチャシンバナー",
+    "any_4star": "全★4カード",
+    "lim_4star": "髪型付き限定★4",
+    "fes_4star": "フェス限★4",
+    "perm_4star": "恒常★4",
+    "mixed_banner": "混合イベバナー",
+    "mixed_lineup": "混合イベ登場",
+    "event_3star": "イベント報酬★3",
+    "event_2star": "イベント報酬★2",
+    "alt_vocal": "アナザーボーカル",
+    "stamp": "イラストスタンプ"
+  },
+  "dossier": {
+    "all_clocks": "全カテゴリ経過日数一覧",
+    "attr_ring": "5属性★4内訳",
+    "sekai_subunits": "セカイ別サブユニット★4内訳",
+    "timeline_title": "★4カード実装＆間隔ヒストリー",
+    "back_overview": "一覧に戻る"
+  },
+  "error_page": {
+    "not_found": "ページが見つかりません。",
+    "home": "トップへ戻る",
+    "title": "エラーが発生しました",
+    "text": "予期せぬエラーが発生しました。",
+    "issues_link": "GitHub Issues",
+    "to_fix_it": " にてご報告ください。",
+    "copy": "エラーをコピー",
+    "reload": "再読み込み",
+    "clear": "ローカルキャッシュ初期化"
+  },
+  "footer": {
+    "fan_made": "非公式ファンサイトです。SEGA・Colorful Palette・クリプトン・フューチャー・メディアとは一切関係ありません。",
+    "data_from": "データ・画像参照元:",
+    "inspired_by": "インスパイア:"
+  }
+}
