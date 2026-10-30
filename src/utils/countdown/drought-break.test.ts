@@ -108,6 +108,12 @@ describe('drought-break analytics engine', () => {
       expect(resolveUnitId('wxs')).toBe('wonderlands_showtime');
       expect(resolveUnitId('theme_park')).toBe('wonderlands_showtime');
       expect(resolveUnitId('wonderlands_showtime')).toBe('wonderlands_showtime');
+      expect(resolveUnitId('レオニ')).toBe('leo_need');
+      expect(resolveUnitId('モモジャン')).toBe('more_more_jump');
+      expect(resolveUnitId('ビビバス')).toBe('vivid_bad_squad');
+      expect(resolveUnitId('ワンダショ')).toBe('wonderlands_showtime');
+      expect(resolveUnitId('ニーゴ')).toBe('nightcord');
+      expect(resolveUnitId('バチャシン')).toBe('virtual_singer');
       expect(resolveUnitId('vs')).toBe('virtual_singer');
       expect(resolveUnitId('virtual_singer')).toBe('virtual_singer');
       expect(resolveUnitId('unknown_unit')).toBeUndefined();

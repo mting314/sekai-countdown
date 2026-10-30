@@ -161,6 +161,7 @@ export function characterSearchHaystack(ch: CountdownCharacter): string {
       ch.abbrev,
       meta.nameEn,
       meta.shortEn,
+      meta.shortJa,
       meta.nameJa,
       UNIT_ALIASES[ch.unit]
     ]

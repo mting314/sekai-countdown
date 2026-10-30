@@ -521,7 +521,13 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
                   {uMeta && (
                     <img src={unitIconUrl(u as SekaiUnitId)} alt="" width={14} height={14} />
                   )}
-                  <span>{u === 'all' ? t('dossier.filter_all') : uMeta?.shortEn}</span>
+                  <span>
+                    {u === 'all'
+                      ? t('dossier.filter_all')
+                      : i18n.language.startsWith('ja')
+                        ? uMeta?.shortJa
+                        : uMeta?.shortEn}
+                  </span>
                 </button>
               );
             })}

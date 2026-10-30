@@ -77,7 +77,7 @@ export function UnitBadge({
   const meta = UNIT_META[unit];
   const label = i18n.language.startsWith('ja')
     ? short
-      ? meta.shortEn
+      ? meta.shortJa
       : meta.nameJa
     : short
       ? meta.shortEn

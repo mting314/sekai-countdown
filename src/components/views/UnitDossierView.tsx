@@ -27,20 +27,28 @@ const UNIT_ALIASES: Record<string, SekaiUnitId> = {
   ln: 'leo_need',
   leo_need: 'leo_need',
   light_sound: 'leo_need',
+  レオニ: 'leo_need',
+  レオニード: 'leo_need',
   mmj: 'more_more_jump',
   more_more_jump: 'more_more_jump',
   idol: 'more_more_jump',
+  モモジャン: 'more_more_jump',
+  モアジャン: 'more_more_jump',
   vbs: 'vivid_bad_squad',
   vivid_bad_squad: 'vivid_bad_squad',
   street: 'vivid_bad_squad',
+  ビビバス: 'vivid_bad_squad',
   wxs: 'wonderlands_showtime',
   wonderlands_showtime: 'wonderlands_showtime',
   theme_park: 'wonderlands_showtime',
+  ワンダショ: 'wonderlands_showtime',
   n25: 'nightcord',
   nightcord: 'nightcord',
   school_refusal: 'nightcord',
+  ニーゴ: 'nightcord',
   vs: 'virtual_singer',
-  virtual_singer: 'virtual_singer'
+  virtual_singer: 'virtual_singer',
+  バチャシン: 'virtual_singer'
 };
 
 export function resolveUnitId(raw: string): SekaiUnitId | undefined {
@@ -167,7 +175,7 @@ export function UnitDossierView({ unitId }: { unitId: string }) {
                   }}
                 >
                   <img src={unitIconUrl(u)} alt="" width={16} height={16} />
-                  <span>{uMeta.shortEn}</span>
+                  <span>{i18n.language.startsWith('ja') ? uMeta.shortJa : uMeta.shortEn}</span>
                 </Link>
               );
             })}

@@ -42,48 +42,55 @@ export const ATTRIBUTE_META: Record<
 
 export const UNIT_META: Record<
   SekaiUnitId | 'mixed',
-  { nameEn: string; shortEn: string; nameJa: string; color: string }
+  { nameEn: string; shortEn: string; nameJa: string; shortJa: string; color: string }
 > = {
   leo_need: {
     nameEn: 'Leo/need',
     shortEn: 'L/n',
     nameJa: 'Leo/need',
+    shortJa: 'レオニ',
     color: '#4455dd'
   },
   more_more_jump: {
     nameEn: 'MORE MORE JUMP!',
     shortEn: 'MMJ',
     nameJa: 'MORE MORE JUMP！',
+    shortJa: 'モモジャン',
     color: '#66cc44'
   },
   vivid_bad_squad: {
     nameEn: 'Vivid BAD SQUAD',
     shortEn: 'VBS',
     nameJa: 'Vivid BAD SQUAD',
+    shortJa: 'ビビバス',
     color: '#ee1166'
   },
   wonderlands_showtime: {
     nameEn: 'Wonderlands×Showtime',
     shortEn: 'WxS',
     nameJa: 'ワンダーランズ×ショウタイム',
+    shortJa: 'ワンダショ',
     color: '#ff9900'
   },
   nightcord: {
     nameEn: 'Nightcord at 25:00',
     shortEn: 'N25',
     nameJa: '25時、ナイトコードで。',
+    shortJa: 'ニーゴ',
     color: '#884499'
   },
   virtual_singer: {
     nameEn: 'Virtual Singer',
     shortEn: 'VS',
     nameJa: 'バーチャル・シンガー',
+    shortJa: 'バチャシン',
     color: '#33ccbb'
   },
   mixed: {
     nameEn: 'Mixed / Crossover',
     shortEn: 'Mixed',
     nameJa: 'シャッフル・混合',
+    shortJa: '混合',
     color: '#8a8a9e'
   }
 };

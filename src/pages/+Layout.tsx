@@ -277,7 +277,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       hideFrom="xl"
                       hideBelow="sm"
                     >
-                      {meta.shortEn}
+                      {i18n.language.startsWith('ja') ? meta.shortJa : meta.shortEn}
                     </Box>
                   </Link>
 
