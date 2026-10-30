@@ -12,3 +12,5 @@ export const characterHref = (id: number | string) => routeHref(`/characters/${i
 export const cardHref = (id: number | string) => routeHref(`/cards/${id}`);
 export const eventHref = (id: number | string) => routeHref(`/events/${id}`);
 export const unitHref = (id: string) => routeHref(`/units/${id}`);
+export const songsHref = () => routeHref('/songs');
+export const songHref = (id: number | string) => routeHref(`/songs/${id}`);

@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import bakedSnapshotJson from '../../data/sekai/snapshot.json';
 import type {
+  CompactAnotherVocal,
   CompactCard,
   CompactEvent,
   CompactMusic,
@@ -29,6 +30,8 @@ interface CountdownDataContextValue {
   cardById: Map<number, CompactCard>;
   eventById: Map<number, CompactEvent>;
   musicById: Map<number, CompactMusic>;
+  anotherVocalsByMusicId: Map<number, CompactAnotherVocal[]>;
+  eventBySongId: Map<number, CompactEvent>;
   stampById: Map<number, CompactStamp>;
 }
 
@@ -126,11 +129,27 @@ export function CountdownDataProvider({ children }: { children: React.ReactNode 
   }, []);
 
   const lookups = useMemo(() => {
+    const anotherVocalsByMusicId = new Map<number, CompactAnotherVocal[]>();
+    for (const av of snapshot.anotherVocals) {
+      const list = anotherVocalsByMusicId.get(av.musicId) ?? [];
+      list.push(av);
+      anotherVocalsByMusicId.set(av.musicId, list);
+    }
+
+    const eventBySongId = new Map<number, CompactEvent>();
+    for (const ev of snapshot.events) {
+      if (ev.songId) {
+        eventBySongId.set(ev.songId, ev);
+      }
+    }
+
     return {
       charById: new Map(snapshot.characters.map((c) => [c.id, c])),
       cardById: new Map(snapshot.cards.map((c) => [c.id, c])),
       eventById: new Map(snapshot.events.map((e) => [e.id, e])),
       musicById: new Map(snapshot.musics.map((m) => [m.id, m])),
+      anotherVocalsByMusicId,
+      eventBySongId,
       stampById: new Map(snapshot.stamps.map((s) => [s.id, s]))
     };
   }, [snapshot]);

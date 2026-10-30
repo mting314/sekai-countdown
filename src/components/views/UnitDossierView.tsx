@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-system/css';
 import { Box, Flex, Grid, HStack, Stack } from 'styled-system/jsx';
@@ -7,8 +7,8 @@ import { AttributeIcon, CardThumbTile, CharacterIcon } from '~/components/sekai/
 import { Link } from '~/components/ui/link';
 import { Text } from '~/components/ui/text';
 import { useCountdownData } from '~/context/CountdownDataContext';
-import type { SekaiUnitId } from '~/types/countdown';
-import { unitIconUrl } from '~/utils/countdown/assets';
+import type { CompactEvent, SekaiUnitId } from '~/types/countdown';
+import { eventHomeBannerUrl, eventStoryBannerUrl, unitIconUrl } from '~/utils/countdown/assets';
 import { ALL_UNITS, ATTRIBUTE_META, CARD_ATTRIBUTES, UNIT_META } from '~/utils/countdown/constants';
 import {
   charDisplayName,
@@ -54,6 +54,42 @@ const UNIT_ALIASES: Record<string, SekaiUnitId> = {
 export function resolveUnitId(raw: string): SekaiUnitId | undefined {
   const norm = raw.toLowerCase().trim();
   return UNIT_ALIASES[norm];
+}
+
+function EventBannerThumb({
+  event,
+  fallbackCharId
+}: {
+  event: CompactEvent;
+  fallbackCharId?: number;
+}) {
+  const [stage, setStage] = useState(0);
+  const homeUrl = eventHomeBannerUrl(event.assetbundleName);
+  const storyUrl = eventStoryBannerUrl(event);
+
+  const src = stage === 0 ? homeUrl : stage === 1 ? storyUrl : undefined;
+
+  if (!src) {
+    return fallbackCharId ? <CharacterIcon characterId={fallbackCharId} size={42} /> : null;
+  }
+
+  return (
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      referrerPolicy="no-referrer"
+      onError={() => setStage((s) => s + 1)}
+      style={{
+        width: 120,
+        height: 51,
+        objectFit: 'cover',
+        borderRadius: 8,
+        border: '1px solid rgba(255,255,255,0.12)',
+        flexShrink: 0
+      }}
+    />
+  );
 }
 
 export function UnitDossierView({ unitId }: { unitId: string }) {
@@ -196,9 +232,9 @@ export function UnitDossierView({ unitId }: { unitId: string }) {
 
         <Grid gap="4" columns={{ base: 1, md: 2, lg: 4 }}>
           {memberDossiers.map(({ character, dossier }) => {
-            const any4Clock = dossier?.clocks.find((c) => c.key === 'char_any_4star')?.clock;
-            const lim4Clock = dossier?.clocks.find((c) => c.key === 'char_lim_4star')?.clock;
-            const soloClock = dossier?.clocks.find((c) => c.key === 'char_solo_focus')?.clock;
+            const any4Clock = dossier?.clocks.find((c) => c.key === 'any_4star')?.clock;
+            const lim4Clock = dossier?.clocks.find((c) => c.key === 'lim_4star')?.clock;
+            const soloClock = dossier?.clocks.find((c) => c.key === 'solo_focus')?.clock;
             const heroCard = dossier?.heroCard;
 
             return (
@@ -291,10 +327,13 @@ export function UnitDossierView({ unitId }: { unitId: string }) {
 
                   <Link
                     className={css({
+                      display: 'block',
                       borderColor: 'border.default',
                       rounded: 'lg',
                       borderWidth: '1px',
+                      width: '100%',
                       py: '1.5',
+                      px: '3',
                       fontSize: 'xs',
                       fontWeight: 'bold',
                       textAlign: 'center',
@@ -303,7 +342,7 @@ export function UnitDossierView({ unitId }: { unitId: string }) {
                     })}
                     href={characterHref(character.id)}
                   >
-                    {charDisplayName(character, i18n.language, true)} Dossier →
+                    {t('common.read_more')} →
                   </Link>
                 </Stack>
               </Box>
@@ -484,21 +523,43 @@ export function UnitDossierView({ unitId }: { unitId: string }) {
                         {t('common.days', { count: duo.daysSince })}
                       </span>
                       {duo.latestEvent && (
-                        <Link
-                          className={css({
-                            color: 'fg.muted',
-                            fontSize: 'xs',
-                            _hover: { textDecoration: 'underline' }
-                          })}
-                          href={eventHref(duo.latestEvent.id)}
-                        >
-                          {duo.latestEvent.nickname ? `[${duo.latestEvent.nickname}] ` : ''}
-                          {localizedTitle(
-                            duo.latestEvent.nameJa,
-                            duo.latestEvent.nameEn,
-                            i18n.language
+                        <HStack gap="1.5" alignItems="center">
+                          {duo.latestEvent.nickname && (
+                            <span
+                              className={css({
+                                rounded: 'sm',
+                                borderWidth: '1px',
+                                py: '0.2',
+                                px: '1.5',
+                                fontSize: '2xs',
+                                fontWeight: 'bold'
+                              })}
+                              style={{
+                                borderColor: `${charById.get(duo.latestEvent.focusCharacterId ?? 0)?.color ?? meta.color}88`,
+                                color:
+                                  charById.get(duo.latestEvent.focusCharacterId ?? 0)?.color ??
+                                  meta.color,
+                                backgroundColor: `${charById.get(duo.latestEvent.focusCharacterId ?? 0)?.color ?? meta.color}1a`
+                              }}
+                            >
+                              {duo.latestEvent.nickname}
+                            </span>
                           )}
-                        </Link>
+                          <Link
+                            className={css({
+                              color: 'fg.muted',
+                              fontSize: 'xs',
+                              _hover: { textDecoration: 'underline' }
+                            })}
+                            href={eventHref(duo.latestEvent.id)}
+                          >
+                            {localizedTitle(
+                              duo.latestEvent.nameJa,
+                              duo.latestEvent.nameEn,
+                              i18n.language
+                            )}
+                          </Link>
+                        </HStack>
                       )}
                     </HStack>
                   </Stack>
@@ -534,8 +595,10 @@ export function UnitDossierView({ unitId }: { unitId: string }) {
                   bg="bg.subtle"
                 >
                   <Flex gap="3" justifyContent="space-between" alignItems="center" flexWrap="wrap">
-                    <HStack gap="3">
-                      {focusChar && <CharacterIcon characterId={focusChar.id} size={38} />}
+                    <HStack gap="3" alignItems="center">
+                      <Link className={css({ flexShrink: 0 })} href={eventHref(ev.id)}>
+                        <EventBannerThumb event={ev} fallbackCharId={focusChar?.id} />
+                      </Link>
                       <Stack gap="0.5">
                         <HStack gap="2" flexWrap="wrap">
                           {ev.nickname && (
@@ -613,7 +676,7 @@ export function UnitDossierView({ unitId }: { unitId: string }) {
                         })}
                         href={eventHref(ev.id)}
                       >
-                        Event Dossier →
+                        {t('common.read_more')} →
                       </Link>
                     </HStack>
                   </Flex>

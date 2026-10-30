@@ -6,6 +6,8 @@
     "overview": "総合トップ",
     "focus": "箱イベ・ローテ",
     "cards": "★4・限定未実装",
+    "events": "イベント一覧",
+    "songs": "楽曲一覧",
     "virtual_singers": "バチャシン枠",
     "mixed_attrs": "混合・属性マップ",
     "extras": "楽曲・スタンプ"
@@ -35,7 +37,8 @@
     "sort_days": "経過日数順",
     "sort_overdue": "平均比超過順",
     "sort_character": "キャラクター順",
-    "view_dossier": "キャラ別詳細を開く"
+    "view_dossier": "キャラ別詳細を開く",
+    "read_more": "詳細を見る"
   },
   "overview": {
     "hero_live": "開催中のイベント",
@@ -217,6 +220,26 @@
     "view_card_dossier": "カード詳細 →",
     "prev_event": "前のイベント",
     "next_event": "次のイベント"
+  },
+  "songs_page": {
+    "title": "楽曲＆書き下ろし曲カタログ",
+    "subtitle": "全ユニットの書き下ろし楽曲、カバー曲、実装日、歌唱メンバー、アナザーボーカル音源を網羅。",
+    "search_placeholder": "曲名、歌唱メンバー、コンポーザー等で検索…",
+    "filter_all": "すべての楽曲",
+    "filter_commissioned": "書き下ろし楽曲",
+    "filter_cover": "カバー楽曲",
+    "filter_original": "原曲・その他",
+    "count_total": "全{{count}}曲",
+    "alt_vocals_count": "アナザー{{count}}種",
+    "commissioned_badge": "書き下ろし",
+    "cover_badge": "カバー",
+    "vocalists": "歌唱メンバー",
+    "associated_event": "対象イベント",
+    "another_vocals": "アナザーボーカル一覧",
+    "released_on": "{{date}} 実装",
+    "view_song": "楽曲詳細 →",
+    "prev_song": "前の楽曲",
+    "next_song": "次の楽曲"
   },
   "error_page": {
     "not_found": "ページが見つかりません。",

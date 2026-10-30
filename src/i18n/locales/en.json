@@ -6,6 +6,8 @@
     "overview": "Overview",
     "focus": "Focus & Rotation",
     "cards": "4★ & Lim Jail",
+    "events": "Events",
+    "songs": "Songs",
     "virtual_singers": "Virtual Singers",
     "mixed_attrs": "Mixed & Attributes",
     "extras": "Songs & Extras"
@@ -35,7 +37,8 @@
     "sort_days": "Longest Wait",
     "sort_overdue": "Most Overdue (vs Avg)",
     "sort_character": "Character Order",
-    "view_dossier": "Open character dossier"
+    "view_dossier": "Open character dossier",
+    "read_more": "Read more"
   },
   "overview": {
     "hero_live": "LIVE JP EVENT",
@@ -217,6 +220,26 @@
     "view_card_dossier": "Card Dossier →",
     "prev_event": "Prev Event",
     "next_event": "Next Event"
+  },
+  "songs_page": {
+    "title": "Songs & Commissioned Track Catalog",
+    "subtitle": "Explore all commissioned songs, covers, and music releases across Project SEKAI with vocal lineups, another vocals, and event links.",
+    "search_placeholder": "Search by song title, vocalists, lyrics/composer…",
+    "filter_all": "All Songs",
+    "filter_commissioned": "Commissioned (書き下ろし)",
+    "filter_cover": "Cover (カバー)",
+    "filter_original": "Other / Original",
+    "count_total": "{{count}} songs",
+    "alt_vocals_count": "{{count}} Alt Vocals",
+    "commissioned_badge": "Commissioned",
+    "cover_badge": "Cover",
+    "vocalists": "Vocal Lineup",
+    "associated_event": "Commissioned Event",
+    "another_vocals": "Another Vocal Versions",
+    "released_on": "Released on {{date}}",
+    "view_song": "Song Dossier →",
+    "prev_song": "Prev Song",
+    "next_song": "Next Song"
   },
   "error_page": {
     "not_found": "This page doesn't exist.",
