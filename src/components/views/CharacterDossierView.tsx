@@ -127,18 +127,6 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
             <Link href={unitHref(character.unit)}>
               <UnitBadge unit={character.unit} />
             </Link>
-            <span
-              className={css({
-                rounded: 'md',
-                py: '0.5',
-                px: '2',
-                fontSize: 'xs',
-                fontWeight: 'bold',
-                bg: 'bg.muted'
-              })}
-            >
-              #{character.abbrev}
-            </span>
           </HStack>
 
           <HStack gap="3.5" alignItems="center">
@@ -315,7 +303,7 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
                             : t('common.never')}
                         </span>
                       )}
-                      <span className={css({ color: 'fg.muted', fontSize: '2xs' })}>
+                      <span className={css({ color: 'fg.muted', fontSize: 'xs' })}>
                         {formatDateShort(clock.lastTimestamp, i18n.language)}
                       </span>
                     </Stack>
@@ -381,7 +369,7 @@ export function CharacterDossierView({ characterId }: { characterId: number }) {
                       >
                         {t('common.days', { count: clock.daysSince })}
                       </span>
-                      <span className={css({ color: 'fg.muted', fontSize: '2xs' })}>
+                      <span className={css({ color: 'fg.muted', fontSize: 'xs' })}>
                         {formatDateShort(clock.lastTimestamp, i18n.language)}
                       </span>
                     </Stack>

@@ -161,7 +161,13 @@ export function DroughtMeter({
         )}
       </Box>
       {!compact && (
-        <HStack justifyContent="space-between" color="fg.muted" fontSize="2xs" flexWrap="wrap">
+        <HStack
+          justifyContent="space-between"
+          color="fg.muted"
+          fontSize="xs"
+          fontWeight="medium"
+          flexWrap="wrap"
+        >
           <span className={css({ fontVariantNumeric: 'tabular-nums' })}>
             {t('common.avg_gap', { days: clock.avgGapDays })} · {clock.overdueRatio.toFixed(2)}×
           </span>
